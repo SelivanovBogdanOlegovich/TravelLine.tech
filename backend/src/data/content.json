@@ -1,0 +1,87 @@
+{
+  "header": {
+    "logo": "TravelLine",
+    "nav": [
+      "Directions",
+      "Vacancies",
+      "About",
+      "Benefits"
+    ]
+  },
+  "hero": {
+    "title": "TravelLine",
+    "subtitle": "Современная платформа для управления отельным бизнесом"
+  },
+  "directions": [
+    {
+      "id": 1,
+      "title": "Frontend",
+      "description": "Разработка клиентских интерфейсов"
+    },
+    {
+      "id": 2,
+      "title": "Backend",
+      "description": "Разработка серверной логики"
+    }
+  ],
+  "about": {
+    "title": "О компании",
+    "description": "TravelLine разрабатывает IT-решения для отельного бизнеса"
+  },
+  "benefits": [
+    {
+      "id": 1,
+      "title": "Обучение",
+      "description": "Развитие профессиональных навыков"
+    },
+    {
+      "id": 2,
+      "title": "Команда",
+      "description": "Работа с опытными специалистами"
+    }
+  ],
+  "testimonials": [
+    {
+      "id": 1,
+      "name": "Анна",
+      "text": "TravelLine — отличное место для профессионального роста"
+    }
+  ],
+  "cta": {
+    "title": "Присоединяйся к TravelLine",
+    "buttonText": "Смотреть вакансии"
+  },
+  "stats": [
+    {
+      "id": 1,
+      "label": "Сотрудников",
+      "value": "500+"
+    },
+    {
+      "id": 2,
+      "label": "Лет на рынке",
+      "value": "15+"
+    }
+  ],
+  "vacancies": [
+    {
+      "id": 1,
+      "title": "Frontend Developer",
+      "location": "Remote",
+      "type": "Full-time"
+    },
+    {
+      "id": 2,
+      "title": "Backend Developer",
+      "location": "Remote",
+      "type": "Full-time"
+    }
+  ],
+  "footer": {
+    "copyright": "© 2026 TravelLine",
+    "links": [
+      "Privacy",
+      "Contacts"
+    ]
+  }
+}
