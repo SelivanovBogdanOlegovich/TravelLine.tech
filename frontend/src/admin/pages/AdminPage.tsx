@@ -1,15 +1,25 @@
 import { useCallback, useEffect, useState } from "react";
 import type { CSSProperties } from "react";
 import HeroForm from "../forms/HeroForm";
+import TeamForm from "../forms/TeamForm";
 import { getAdminHero, updateAdminHero } from "../api/heroAdminApi";
 import type { HeroData } from "../api/heroAdminApi";
+import { getAdminTeam, updateAdminTeam } from "../api/teamAdminApi";
+import type { TeamData } from "../api/teamAdminApi";
 import type { HeroFormData } from "../types/heroForm";
+import type { TeamFormData } from "../types/teamForm";
 
 const normalizeHero = (hero: HeroData): HeroFormData => ({
   title: hero.title ?? "",
   subtitle: hero.subtitle ?? "",
   buttonText: hero.buttonText,
   stats: hero.stats ?? [],
+});
+
+const normalizeTeam = (team: TeamData): TeamFormData => ({
+  title: team.title,
+  subtitle: team.subtitle,
+  members: team.members,
 });
 
 const getErrorMessage = (error: unknown) =>
@@ -22,6 +32,12 @@ export default function AdminPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isSaved, setIsSaved] = useState(false);
+  const [team, setTeam] = useState<TeamFormData | null>(null);
+  const [isTeamLoading, setIsTeamLoading] = useState(true);
+  const [teamLoadError, setTeamLoadError] = useState<string | null>(null);
+  const [isTeamSaving, setIsTeamSaving] = useState(false);
+  const [teamSaveError, setTeamSaveError] = useState<string | null>(null);
+  const [isTeamSaved, setIsTeamSaved] = useState(false);
 
   const loadHero = useCallback(async () => {
     try {
@@ -36,9 +52,32 @@ export default function AdminPage() {
     }
   }, []);
 
+  const loadTeam = useCallback(async () => {
+    try {
+      const teamData = await getAdminTeam();
+
+      setTeam(normalizeTeam(teamData));
+      setTeamLoadError(null);
+    } catch (error) {
+      setTeamLoadError(getErrorMessage(error));
+    } finally {
+      setIsTeamLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
-    void loadHero();
-  }, [loadHero]);
+    const heroTimeoutId = window.setTimeout(() => {
+      void loadHero();
+    }, 0);
+    const teamTimeoutId = window.setTimeout(() => {
+      void loadTeam();
+    }, 0);
+
+    return () => {
+      window.clearTimeout(heroTimeoutId);
+      window.clearTimeout(teamTimeoutId);
+    };
+  }, [loadHero, loadTeam]);
 
   const handleHeroSubmit = async (heroData: HeroFormData) => {
     setIsSaving(true);
@@ -53,6 +92,22 @@ export default function AdminPage() {
       setSaveError(getErrorMessage(error));
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleTeamSubmit = async (teamData: TeamFormData) => {
+    setIsTeamSaving(true);
+    setTeamSaveError(null);
+    setIsTeamSaved(false);
+
+    try {
+      await updateAdminTeam(teamData);
+      await loadTeam();
+      setIsTeamSaved(true);
+    } catch (error) {
+      setTeamSaveError(getErrorMessage(error));
+    } finally {
+      setIsTeamSaving(false);
     }
   };
 
@@ -94,12 +149,52 @@ export default function AdminPage() {
             )}
 
             <HeroForm
+              key={JSON.stringify(hero)}
               hero={hero}
               isSaving={isSaving}
               onSubmit={handleHeroSubmit}
             />
           </>
         )}
+
+        <section style={styles.adminSection}>
+          {isTeamLoading && (
+            <p style={styles.message}>
+              {"\u0417\u0430\u0433\u0440\u0443\u0437\u043a\u0430 \u043a\u043e\u043c\u0430\u043d\u0434\u044b..."}
+            </p>
+          )}
+
+          {teamLoadError && (
+            <p style={{ ...styles.message, ...styles.error }}>
+              {"\u041e\u0448\u0438\u0431\u043a\u0430 \u0437\u0430\u0433\u0440\u0443\u0437\u043a\u0438 \u043a\u043e\u043c\u0430\u043d\u0434\u044b: "}
+              {teamLoadError}
+            </p>
+          )}
+
+          {team && !isTeamLoading && !teamLoadError && (
+            <>
+              {isTeamSaved && (
+                <p style={{ ...styles.message, ...styles.success }}>
+                  {"\u041a\u043e\u043c\u0430\u043d\u0434\u0430 \u0441\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u0430"}
+                </p>
+              )}
+
+              {teamSaveError && (
+                <p style={{ ...styles.message, ...styles.error }}>
+                  {"\u041e\u0448\u0438\u0431\u043a\u0430 \u0441\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u0438\u044f \u043a\u043e\u043c\u0430\u043d\u0434\u044b: "}
+                  {teamSaveError}
+                </p>
+              )}
+
+              <TeamForm
+                key={JSON.stringify(team)}
+                team={team}
+                isSaving={isTeamSaving}
+                onSubmit={handleTeamSubmit}
+              />
+            </>
+          )}
+        </section>
       </section>
     </main>
   );
@@ -141,6 +236,10 @@ const styles: Record<string, CSSProperties> = {
   message: {
     margin: "0 0 16px",
     color: "#c9cdd6",
+  },
+
+  adminSection: {
+    marginTop: "40px",
   },
 
   success: {

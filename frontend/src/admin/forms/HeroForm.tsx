@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { CSSProperties, FormEvent } from "react";
 import type { HeroFormData } from "../types/heroForm";
 
@@ -14,10 +14,6 @@ export default function HeroForm({
   onSubmit,
 }: HeroFormProps) {
   const [formData, setFormData] = useState<HeroFormData>(hero);
-
-  useEffect(() => {
-    setFormData(hero);
-  }, [hero]);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
