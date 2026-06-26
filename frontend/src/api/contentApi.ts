@@ -89,8 +89,11 @@ export type ContentData = {
 
 const API_URL = (import.meta.env.VITE_API_URL ?? "").replace(/\/$/, "");
 
-const getJson = async <T>(endpoint: string): Promise<T> => {
-  const response = await fetch(`${API_URL}${endpoint}`);
+export const apiRequest = async <T>(
+  endpoint: string,
+  options?: RequestInit,
+): Promise<T> => {
+  const response = await fetch(`${API_URL}${endpoint}`, options);
 
   if (!response.ok) {
     throw new Error(`API request failed: ${response.status}`);
@@ -98,6 +101,8 @@ const getJson = async <T>(endpoint: string): Promise<T> => {
 
   return response.json() as Promise<T>;
 };
+
+const getJson = <T>(endpoint: string): Promise<T> => apiRequest<T>(endpoint);
 
 export const getContent = () => getJson<ContentData>("/api/content");
 
