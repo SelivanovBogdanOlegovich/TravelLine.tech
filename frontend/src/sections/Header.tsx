@@ -1,14 +1,27 @@
-import content from "../data/content";
+import type { ContentData } from "../api/contentApi";
+import type { CSSProperties } from "react";
 
-export default function Header() {
+type HeaderProps = {
+  header: ContentData["header"];
+};
+
+export default function Header({ header }: HeaderProps) {
+  const links =
+    header?.links ??
+    header?.nav?.map((label) => ({
+      label,
+      id: label.toLowerCase(),
+    })) ??
+    [];
+
   return (
     <header style={styles.header}>
       <div style={styles.logo}>
-        {content.header.logo}
+        {header?.logo}
       </div>
 
       <nav style={styles.nav}>
-        {content.header.links.map((link, i) => (
+        {links.map((link, i) => (
           <a key={i} href={"#" + link.id} style={styles.link}>
             {link.label}
           </a>
@@ -16,13 +29,13 @@ export default function Header() {
       </nav>
 
       <button style={styles.button}>
-        {content.header.buttonText}
+        {header?.buttonText ?? "Apply"}
       </button>
     </header>
   );
 }
 
-const styles: any = {
+const styles: Record<string, CSSProperties> = {
   header: {
     position: "sticky",
     top: 0,

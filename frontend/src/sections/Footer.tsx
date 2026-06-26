@@ -1,12 +1,22 @@
-import content from "../data/content";
+import type { ContentData, FooterLink } from "../api/contentApi";
+import type { CSSProperties } from "react";
 
-export default function Footer() {
+type FooterProps = {
+  footer: ContentData["footer"];
+};
+
+const toFooterLink = (link: FooterLink | string): FooterLink =>
+  typeof link === "string" ? { label: link, url: "#" } : link;
+
+export default function Footer({ footer }: FooterProps) {
+  const links = footer?.links?.map(toFooterLink) ?? [];
+
   return (
     <footer style={styles.footer}>
-      <p>{content.footer.text}</p>
+      <p>{footer?.text ?? footer?.copyright}</p>
 
       <div style={styles.links}>
-        {content.footer.links.map((l, i) => (
+        {links.map((l, i) => (
           <a key={i} href={l.url} style={styles.link}>
             {l.label}
           </a>
@@ -16,7 +26,7 @@ export default function Footer() {
   );
 }
 
-const styles: any = {
+const styles: Record<string, CSSProperties> = {
   footer: {
     padding: "40px",
     background: "#0b0d12",

@@ -1,15 +1,25 @@
-import content from "../data/content";
+import type { Benefit, ContentData } from "../api/contentApi";
+import type { CSSProperties } from "react";
 
-export default function Benefits() {
+type BenefitsProps = {
+  benefits: ContentData["benefits"];
+};
+
+export default function Benefits({ benefits }: BenefitsProps) {
+  const title = Array.isArray(benefits) ? "Benefits" : benefits?.title;
+  const items: Benefit[] = Array.isArray(benefits)
+    ? benefits
+    : benefits?.items ?? [];
+
   return (
     <section style={styles.section}>
-      <h2 style={styles.title}>{content.benefits.title}</h2>
+      <h2 style={styles.title}>{title}</h2>
 
       <div style={styles.grid}>
-        {content.benefits.items.map((item, i) => (
+        {items.map((item, i) => (
           <div key={i} style={styles.card}>
             <h3>{item.title}</h3>
-            <p style={{ opacity: 0.7 }}>{item.text}</p>
+            <p style={{ opacity: 0.7 }}>{item.text ?? item.description}</p>
           </div>
         ))}
       </div>
@@ -17,7 +27,7 @@ export default function Benefits() {
   );
 }
 
-const styles: any = {
+const styles: Record<string, CSSProperties> = {
   section: {
     padding: "80px 40px",
     background: "#111217",

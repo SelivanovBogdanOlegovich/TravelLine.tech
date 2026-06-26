@@ -1,12 +1,21 @@
-import content from "../data/content";
+import type { ContentData, StatItem } from "../api/contentApi";
+import type { CSSProperties } from "react";
 
-export default function Stats() {
+type StatsProps = {
+  stats: ContentData["stats"];
+  statsBlock: ContentData["statsBlock"];
+};
+
+export default function Stats({ stats, statsBlock }: StatsProps) {
+  const title = statsBlock?.title ?? "Company in numbers";
+  const items: StatItem[] = statsBlock?.items ?? stats ?? [];
+
   return (
     <section style={styles.section}>
-      <h2 style={styles.title}>{content.statsBlock.title}</h2>
+      <h2 style={styles.title}>{title}</h2>
 
       <div style={styles.grid}>
-        {content.statsBlock.items.map((item, i) => (
+        {items.map((item, i) => (
           <div key={i} style={styles.card}>
             <div style={styles.value}>{item.value}</div>
             <div style={styles.label}>{item.label}</div>
@@ -17,7 +26,7 @@ export default function Stats() {
   );
 }
 
-const styles: any = {
+const styles: Record<string, CSSProperties> = {
   section: {
     padding: "100px 40px",
     background: "#0b0d12",

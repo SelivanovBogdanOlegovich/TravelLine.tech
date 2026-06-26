@@ -1,15 +1,27 @@
-import content from "../data/content";
+import type { ContentData, Testimonial } from "../api/contentApi";
+import type { CSSProperties } from "react";
 
-export default function Testimonials() {
+type TestimonialsProps = {
+  testimonials: ContentData["testimonials"];
+};
+
+export default function Testimonials({ testimonials }: TestimonialsProps) {
+  const title = Array.isArray(testimonials)
+    ? "What employees say"
+    : testimonials?.title;
+  const items: Testimonial[] = Array.isArray(testimonials)
+    ? testimonials
+    : testimonials?.items ?? [];
+
   return (
     <section style={styles.section}>
-      <h2 style={styles.title}>{content.testimonials.title}</h2>
+      <h2 style={styles.title}>{title}</h2>
 
       <div style={styles.grid}>
-        {content.testimonials.items.map((t, i) => (
+        {items.map((t, i) => (
           <div key={i} style={styles.card}>
             <h3>{t.name}</h3>
-            <p style={{ opacity: 0.6 }}>{t.role}</p>
+            {t.role && <p style={{ opacity: 0.6 }}>{t.role}</p>}
             <p>{t.text}</p>
           </div>
         ))}
@@ -18,7 +30,7 @@ export default function Testimonials() {
   );
 }
 
-const styles: any = {
+const styles: Record<string, CSSProperties> = {
   section: {
     padding: "80px 40px",
     background: "#0f1115",

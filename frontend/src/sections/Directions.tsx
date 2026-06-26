@@ -1,18 +1,23 @@
-import content from "../data/content";
+import type { Direction } from "../api/contentApi";
+import type { CSSProperties } from "react";
 
-export default function Directions() {
+type DirectionsProps = {
+  directions: Direction[];
+};
+
+export default function Directions({ directions }: DirectionsProps) {
   return (
     <section style={styles.section}>
       <h2 style={styles.title}>Directions</h2>
 
       <div style={styles.grid}>
-        {content.directions.map((item, i) => (
+        {directions.map((item, i) => (
           <div key={i} style={styles.card}>
             <h3>{item.title}</h3>
             <p>{item.description}</p>
 
             <div style={styles.tags}>
-              {item.tags.map((tag, j) => (
+              {(item.tags ?? []).map((tag, j) => (
                 <span key={j} style={styles.tag}>
                   {tag}
                 </span>
@@ -25,7 +30,7 @@ export default function Directions() {
   );
 }
 
-const styles: any = {
+const styles: Record<string, CSSProperties> = {
   section: {
     padding: "80px 40px",
     background: "#111318",

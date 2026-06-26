@@ -1,13 +1,18 @@
-import content from "../data/content";
+import type { Vacancy } from "../api/contentApi";
+import type { CSSProperties } from "react";
 
-export default function Vacancies() {
+type VacanciesProps = {
+  vacancies: Vacancy[];
+};
+
+export default function Vacancies({ vacancies }: VacanciesProps) {
   return (
     <section style={styles.section}>
       <div style={styles.container}>
         <h2 style={styles.title}>Vacancies</h2>
 
         <div style={styles.list}>
-          {content.vacancies.map((job, i) => (
+          {vacancies.map((job, i) => (
             <div key={i} style={styles.card}>
               <div>
                 <h3 style={styles.jobTitle}>{job.title}</h3>
@@ -16,7 +21,7 @@ export default function Vacancies() {
                 <p style={styles.meta}>{job.type}</p>
 
                 <div style={styles.stack}>
-                  {job.stack.map((s, j) => (
+                  {(job.stack ?? []).map((s, j) => (
                     <span key={j} style={styles.tag}>
                       {s}
                     </span>
@@ -33,7 +38,7 @@ export default function Vacancies() {
   );
 }
 
-const styles: any = {
+const styles: Record<string, CSSProperties> = {
   section: {
     padding: "80px 40px",
     background: "#0f1115",

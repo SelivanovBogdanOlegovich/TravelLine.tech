@@ -1,20 +1,25 @@
-import content from "../data/content";
+import type { ContentData } from "../api/contentApi";
+import type { CSSProperties } from "react";
 
-export default function About() {
+type AboutProps = {
+  about: ContentData["about"];
+};
+
+export default function About({ about }: AboutProps) {
   return (
     <section style={styles.section}>
       <div style={styles.container}>
-        <h2 style={styles.title}>{content.about.title}</h2>
+        <h2 style={styles.title}>{about?.title}</h2>
 
         <p style={styles.text}>
-          {content.about.text}
+          {about?.text ?? about?.description}
         </p>
       </div>
     </section>
   );
 }
 
-const styles: any = {
+const styles: Record<string, CSSProperties> = {
   section: {
     padding: "80px 40px",
     color: "white",

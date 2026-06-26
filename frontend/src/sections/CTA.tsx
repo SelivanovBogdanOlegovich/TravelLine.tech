@@ -1,19 +1,24 @@
-import content from "../data/content";
+import type { ContentData } from "../api/contentApi";
+import type { CSSProperties } from "react";
 
-export default function CTA() {
+type CTAProps = {
+  cta: ContentData["cta"];
+};
+
+export default function CTA({ cta }: CTAProps) {
   return (
     <section style={styles.section}>
-      <h2>{content.cta.title}</h2>
-      <p style={{ opacity: 0.7 }}>{content.cta.text}</p>
+      <h2>{cta?.title}</h2>
+      {cta?.text && <p style={{ opacity: 0.7 }}>{cta.text}</p>}
 
       <button style={styles.button}>
-        {content.cta.buttonText}
+        {cta?.buttonText}
       </button>
     </section>
   );
 }
 
-const styles: any = {
+const styles: Record<string, CSSProperties> = {
   section: {
     padding: "100px 40px",
     background: "#111",

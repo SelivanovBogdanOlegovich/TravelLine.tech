@@ -1,24 +1,31 @@
-import content from "../data/content";
+import type { ContentData } from "../api/contentApi";
+import type { CSSProperties } from "react";
 
-export default function Hero() {
+type HeroProps = {
+  hero: ContentData["hero"];
+};
+
+export default function Hero({ hero }: HeroProps) {
+  const stats = hero?.stats ?? [];
+
   return (
     <section style={styles.section}>
       <div style={styles.container}>
 
         <h1 style={styles.title}>
-          {content.hero.title}
+          {hero?.title}
         </h1>
 
         <p style={styles.subtitle}>
-          {content.hero.subtitle}
+          {hero?.subtitle}
         </p>
 
         <button style={styles.button}>
-          {content.hero.buttonText}
+          {hero?.buttonText ?? "View vacancies"}
         </button>
 
         <div style={styles.stats}>
-          {content.hero.stats.map((stat, i) => (
+          {stats.map((stat, i) => (
             <div key={i} style={styles.statItem}>
               <div style={styles.statValue}>{stat.value}</div>
               <div style={styles.statLabel}>{stat.label}</div>
@@ -31,7 +38,7 @@ export default function Hero() {
   );
 }
 
-const styles: any = {
+const styles: Record<string, CSSProperties> = {
   section: {
     minHeight: "100vh",
     display: "flex",
