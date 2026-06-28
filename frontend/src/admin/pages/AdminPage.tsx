@@ -1,16 +1,38 @@
 import { useCallback, useEffect, useState } from "react";
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
+import BenefitsForm from "../forms/BenefitsForm";
 import ClientLogosForm from "../forms/ClientLogosForm";
+import ContactForm from "../forms/ContactForm";
+import DirectionsForm from "../forms/DirectionsForm";
+import GalleryForm from "../forms/GalleryForm";
 import HeroForm from "../forms/HeroForm";
+import OfficesForm from "../forms/OfficesForm";
 import PlatformTimelineForm from "../forms/PlatformTimelineForm";
 import TeamForm from "../forms/TeamForm";
+import VacanciesForm from "../forms/VacanciesForm";
+import {
+  getAdminBenefits,
+  updateAdminBenefits,
+} from "../api/benefitsAdminApi";
+import type { BenefitsData } from "../api/benefitsAdminApi";
 import {
   getAdminClientLogos,
   updateAdminClientLogos,
 } from "../api/clientLogosAdminApi";
 import type { ClientLogosData } from "../api/clientLogosAdminApi";
+import { getAdminContact, updateAdminContact } from "../api/contactAdminApi";
+import type { ContactData } from "../api/contactAdminApi";
+import {
+  getAdminDirections,
+  updateAdminDirections,
+} from "../api/directionsAdminApi";
+import type { DirectionsData } from "../api/directionsAdminApi";
+import { getAdminGallery, updateAdminGallery } from "../api/galleryAdminApi";
+import type { GalleryData } from "../api/galleryAdminApi";
 import { getAdminHero, updateAdminHero } from "../api/heroAdminApi";
 import type { HeroData } from "../api/heroAdminApi";
+import { getAdminOffices, updateAdminOffices } from "../api/officesAdminApi";
+import type { OfficesData } from "../api/officesAdminApi";
 import {
   getAdminPlatformTimeline,
   updateAdminPlatformTimeline,
@@ -18,10 +40,40 @@ import {
 import type { PlatformTimelineData } from "../api/platformTimelineAdminApi";
 import { getAdminTeam, updateAdminTeam } from "../api/teamAdminApi";
 import type { TeamData } from "../api/teamAdminApi";
+import {
+  getAdminVacancies,
+  updateAdminVacancies,
+} from "../api/vacanciesAdminApi";
+import type { VacanciesData } from "../api/vacanciesAdminApi";
+import type { BenefitsFormData } from "../types/benefitsForm";
 import type { ClientLogosFormData } from "../types/clientLogosForm";
+import type { ContactFormData } from "../types/contactForm";
+import type { DirectionsFormData } from "../types/directionsForm";
+import type { GalleryFormData } from "../types/galleryForm";
 import type { HeroFormData } from "../types/heroForm";
+import type { OfficesFormData } from "../types/officesForm";
 import type { PlatformTimelineFormData } from "../types/platformTimelineForm";
 import type { TeamFormData } from "../types/teamForm";
+import type { VacanciesFormData } from "../types/vacanciesForm";
+
+type AdminResource<FormData> = {
+  data: FormData | null;
+  isLoading: boolean;
+  loadError: string | null;
+  isSaving: boolean;
+  saveError: string | null;
+  isSaved: boolean;
+  save: (data: FormData) => Promise<void>;
+};
+
+type AdminSectionProps<FormData> = {
+  resource: AdminResource<FormData>;
+  loadingText: string;
+  loadErrorPrefix: string;
+  saveErrorPrefix: string;
+  successText: string;
+  children: (data: FormData) => ReactNode;
+};
 
 const normalizeHero = (hero: HeroData): HeroFormData => ({
   title: hero.title ?? "",
@@ -52,129 +104,84 @@ const normalizeClientLogos = (
   items: clients.items,
 });
 
+const normalizeDirections = (
+  directions: DirectionsData,
+): DirectionsFormData => directions;
+
+const normalizeVacancies = (
+  vacancies: VacanciesData,
+): VacanciesFormData => vacancies;
+
+const normalizeGallery = (gallery: GalleryData): GalleryFormData => ({
+  title: gallery.title,
+  subtitle: gallery.subtitle,
+  items: gallery.items,
+});
+
+const normalizeOffices = (offices: OfficesData): OfficesFormData => ({
+  title: offices.title,
+  subtitle: offices.subtitle,
+  items: offices.items,
+});
+
+const normalizeBenefits = (benefits: BenefitsData): BenefitsFormData => ({
+  title: benefits.title,
+  subtitle: benefits.subtitle,
+  items: benefits.items,
+});
+
+const normalizeContact = (contact: ContactData): ContactFormData => ({
+  title: contact.title,
+  subtitle: contact.subtitle,
+  buttonText: contact.buttonText,
+});
+
 const getErrorMessage = (error: unknown) =>
   error instanceof Error ? error.message : "Unknown error";
 
-export default function AdminPage() {
-  const [hero, setHero] = useState<HeroFormData | null>(null);
+function useAdminResource<ApiData, FormData>(
+  loadResource: () => Promise<ApiData>,
+  updateResource: (data: FormData) => Promise<ApiData>,
+  normalize: (data: ApiData) => FormData,
+): AdminResource<FormData> {
+  const [data, setData] = useState<FormData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isSaved, setIsSaved] = useState(false);
-  const [team, setTeam] = useState<TeamFormData | null>(null);
-  const [isTeamLoading, setIsTeamLoading] = useState(true);
-  const [teamLoadError, setTeamLoadError] = useState<string | null>(null);
-  const [isTeamSaving, setIsTeamSaving] = useState(false);
-  const [teamSaveError, setTeamSaveError] = useState<string | null>(null);
-  const [isTeamSaved, setIsTeamSaved] = useState(false);
-  const [platformTimeline, setPlatformTimeline] =
-    useState<PlatformTimelineFormData | null>(null);
-  const [isPlatformTimelineLoading, setIsPlatformTimelineLoading] =
-    useState(true);
-  const [platformTimelineLoadError, setPlatformTimelineLoadError] = useState<
-    string | null
-  >(null);
-  const [isPlatformTimelineSaving, setIsPlatformTimelineSaving] =
-    useState(false);
-  const [platformTimelineSaveError, setPlatformTimelineSaveError] = useState<
-    string | null
-  >(null);
-  const [isPlatformTimelineSaved, setIsPlatformTimelineSaved] = useState(false);
-  const [clientLogos, setClientLogos] =
-    useState<ClientLogosFormData | null>(null);
-  const [isClientLogosLoading, setIsClientLogosLoading] = useState(true);
-  const [clientLogosLoadError, setClientLogosLoadError] = useState<
-    string | null
-  >(null);
-  const [isClientLogosSaving, setIsClientLogosSaving] = useState(false);
-  const [clientLogosSaveError, setClientLogosSaveError] = useState<
-    string | null
-  >(null);
-  const [isClientLogosSaved, setIsClientLogosSaved] = useState(false);
 
-  const loadHero = useCallback(async () => {
+  const load = useCallback(async () => {
     try {
-      const heroData = await getAdminHero();
+      const resourceData = await loadResource();
 
-      setHero(normalizeHero(heroData));
+      setData(normalize(resourceData));
       setLoadError(null);
     } catch (error) {
       setLoadError(getErrorMessage(error));
     } finally {
       setIsLoading(false);
     }
-  }, []);
-
-  const loadTeam = useCallback(async () => {
-    try {
-      const teamData = await getAdminTeam();
-
-      setTeam(normalizeTeam(teamData));
-      setTeamLoadError(null);
-    } catch (error) {
-      setTeamLoadError(getErrorMessage(error));
-    } finally {
-      setIsTeamLoading(false);
-    }
-  }, []);
-
-  const loadPlatformTimeline = useCallback(async () => {
-    try {
-      const platformTimelineData = await getAdminPlatformTimeline();
-
-      setPlatformTimeline(normalizePlatformTimeline(platformTimelineData));
-      setPlatformTimelineLoadError(null);
-    } catch (error) {
-      setPlatformTimelineLoadError(getErrorMessage(error));
-    } finally {
-      setIsPlatformTimelineLoading(false);
-    }
-  }, []);
-
-  const loadClientLogos = useCallback(async () => {
-    try {
-      const clientLogosData = await getAdminClientLogos();
-
-      setClientLogos(normalizeClientLogos(clientLogosData));
-      setClientLogosLoadError(null);
-    } catch (error) {
-      setClientLogosLoadError(getErrorMessage(error));
-    } finally {
-      setIsClientLogosLoading(false);
-    }
-  }, []);
+  }, [loadResource, normalize]);
 
   useEffect(() => {
-    const heroTimeoutId = window.setTimeout(() => {
-      void loadHero();
-    }, 0);
-    const teamTimeoutId = window.setTimeout(() => {
-      void loadTeam();
-    }, 0);
-    const platformTimelineTimeoutId = window.setTimeout(() => {
-      void loadPlatformTimeline();
-    }, 0);
-    const clientLogosTimeoutId = window.setTimeout(() => {
-      void loadClientLogos();
+    const timeoutId = window.setTimeout(() => {
+      void load();
     }, 0);
 
     return () => {
-      window.clearTimeout(heroTimeoutId);
-      window.clearTimeout(teamTimeoutId);
-      window.clearTimeout(platformTimelineTimeoutId);
-      window.clearTimeout(clientLogosTimeoutId);
+      window.clearTimeout(timeoutId);
     };
-  }, [loadHero, loadTeam, loadPlatformTimeline, loadClientLogos]);
+  }, [load]);
 
-  const handleHeroSubmit = async (heroData: HeroFormData) => {
+  const save = async (formData: FormData) => {
     setIsSaving(true);
     setSaveError(null);
     setIsSaved(false);
 
     try {
-      await updateAdminHero(heroData);
-      await loadHero();
+      await updateResource(formData);
+      await load();
       setIsSaved(true);
     } catch (error) {
       setSaveError(getErrorMessage(error));
@@ -183,222 +190,286 @@ export default function AdminPage() {
     }
   };
 
-  const handleTeamSubmit = async (teamData: TeamFormData) => {
-    setIsTeamSaving(true);
-    setTeamSaveError(null);
-    setIsTeamSaved(false);
-
-    try {
-      await updateAdminTeam(teamData);
-      await loadTeam();
-      setIsTeamSaved(true);
-    } catch (error) {
-      setTeamSaveError(getErrorMessage(error));
-    } finally {
-      setIsTeamSaving(false);
-    }
+  return {
+    data,
+    isLoading,
+    loadError,
+    isSaving,
+    saveError,
+    isSaved,
+    save,
   };
+}
 
-  const handlePlatformTimelineSubmit = async (
-    platformTimelineData: PlatformTimelineFormData,
-  ) => {
-    setIsPlatformTimelineSaving(true);
-    setPlatformTimelineSaveError(null);
-    setIsPlatformTimelineSaved(false);
+function AdminSection<FormData>({
+  resource,
+  loadingText,
+  loadErrorPrefix,
+  saveErrorPrefix,
+  successText,
+  children,
+}: AdminSectionProps<FormData>) {
+  return (
+    <section style={styles.adminSection}>
+      {resource.isLoading && <p style={styles.message}>{loadingText}</p>}
 
-    try {
-      await updateAdminPlatformTimeline(platformTimelineData);
-      await loadPlatformTimeline();
-      setIsPlatformTimelineSaved(true);
-    } catch (error) {
-      setPlatformTimelineSaveError(getErrorMessage(error));
-    } finally {
-      setIsPlatformTimelineSaving(false);
-    }
-  };
+      {resource.loadError && (
+        <p style={{ ...styles.message, ...styles.error }}>
+          {loadErrorPrefix}
+          {resource.loadError}
+        </p>
+      )}
 
-  const handleClientLogosSubmit = async (
-    clientLogosData: ClientLogosFormData,
-  ) => {
-    setIsClientLogosSaving(true);
-    setClientLogosSaveError(null);
-    setIsClientLogosSaved(false);
+      {resource.data && !resource.isLoading && !resource.loadError && (
+        <>
+          {resource.isSaved && (
+            <p style={{ ...styles.message, ...styles.success }}>
+              {successText}
+            </p>
+          )}
 
-    try {
-      await updateAdminClientLogos(clientLogosData);
-      await loadClientLogos();
-      setIsClientLogosSaved(true);
-    } catch (error) {
-      setClientLogosSaveError(getErrorMessage(error));
-    } finally {
-      setIsClientLogosSaving(false);
-    }
-  };
+          {resource.saveError && (
+            <p style={{ ...styles.message, ...styles.error }}>
+              {saveErrorPrefix}
+              {resource.saveError}
+            </p>
+          )}
+
+          {children(resource.data)}
+        </>
+      )}
+    </section>
+  );
+}
+
+export default function AdminPage() {
+  const heroResource = useAdminResource(
+    getAdminHero,
+    updateAdminHero,
+    normalizeHero,
+  );
+  const teamResource = useAdminResource(
+    getAdminTeam,
+    updateAdminTeam,
+    normalizeTeam,
+  );
+  const platformTimelineResource = useAdminResource(
+    getAdminPlatformTimeline,
+    updateAdminPlatformTimeline,
+    normalizePlatformTimeline,
+  );
+  const clientLogosResource = useAdminResource(
+    getAdminClientLogos,
+    updateAdminClientLogos,
+    normalizeClientLogos,
+  );
+  const directionsResource = useAdminResource(
+    getAdminDirections,
+    updateAdminDirections,
+    normalizeDirections,
+  );
+  const vacanciesResource = useAdminResource(
+    getAdminVacancies,
+    updateAdminVacancies,
+    normalizeVacancies,
+  );
+  const galleryResource = useAdminResource(
+    getAdminGallery,
+    updateAdminGallery,
+    normalizeGallery,
+  );
+  const officesResource = useAdminResource(
+    getAdminOffices,
+    updateAdminOffices,
+    normalizeOffices,
+  );
+  const benefitsResource = useAdminResource(
+    getAdminBenefits,
+    updateAdminBenefits,
+    normalizeBenefits,
+  );
+  const contactResource = useAdminResource(
+    getAdminContact,
+    updateAdminContact,
+    normalizeContact,
+  );
 
   return (
     <main style={styles.page}>
       <section style={styles.panel}>
         <p style={styles.eyebrow}>TravelLine</p>
         <h1 style={styles.title}>Admin Panel</h1>
-        <p style={styles.description}>
-          {"\u0423\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u0435 \u0441\u043e\u0434\u0435\u0440\u0436\u0438\u043c\u044b\u043c \u0441\u0430\u0439\u0442\u0430"}
-        </p>
+        <p style={styles.description}>Управление содержимым сайта</p>
 
-        {isLoading && (
-          <p style={styles.message}>
-            {"\u0417\u0430\u0433\u0440\u0443\u0437\u043a\u0430..."}
-          </p>
-        )}
-
-        {loadError && (
-          <p style={{ ...styles.message, ...styles.error }}>
-            {"\u041e\u0448\u0438\u0431\u043a\u0430 \u0437\u0430\u0433\u0440\u0443\u0437\u043a\u0438: "}
-            {loadError}
-          </p>
-        )}
-
-        {hero && !isLoading && !loadError && (
-          <>
-            {isSaved && (
-              <p style={{ ...styles.message, ...styles.success }}>
-                {"\u0421\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u043e"}
-              </p>
-            )}
-
-            {saveError && (
-              <p style={{ ...styles.message, ...styles.error }}>
-                {"\u041e\u0448\u0438\u0431\u043a\u0430 \u0441\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u0438\u044f: "}
-                {saveError}
-              </p>
-            )}
-
+        <AdminSection
+          resource={heroResource}
+          loadingText="Загрузка..."
+          loadErrorPrefix="Ошибка загрузки: "
+          saveErrorPrefix="Ошибка сохранения: "
+          successText="Сохранено"
+        >
+          {(hero) => (
             <HeroForm
               key={JSON.stringify(hero)}
               hero={hero}
-              isSaving={isSaving}
-              onSubmit={handleHeroSubmit}
+              isSaving={heroResource.isSaving}
+              onSubmit={heroResource.save}
             />
-          </>
-        )}
-
-        <section style={styles.adminSection}>
-          {isTeamLoading && (
-            <p style={styles.message}>
-              {"\u0417\u0430\u0433\u0440\u0443\u0437\u043a\u0430 \u043a\u043e\u043c\u0430\u043d\u0434\u044b..."}
-            </p>
           )}
+        </AdminSection>
 
-          {teamLoadError && (
-            <p style={{ ...styles.message, ...styles.error }}>
-              {"\u041e\u0448\u0438\u0431\u043a\u0430 \u0437\u0430\u0433\u0440\u0443\u0437\u043a\u0438 \u043a\u043e\u043c\u0430\u043d\u0434\u044b: "}
-              {teamLoadError}
-            </p>
+        <AdminSection
+          resource={teamResource}
+          loadingText="Загрузка команды..."
+          loadErrorPrefix="Ошибка загрузки команды: "
+          saveErrorPrefix="Ошибка сохранения команды: "
+          successText="Команда сохранена"
+        >
+          {(team) => (
+            <TeamForm
+              key={JSON.stringify(team)}
+              team={team}
+              isSaving={teamResource.isSaving}
+              onSubmit={teamResource.save}
+            />
           )}
+        </AdminSection>
 
-          {team && !isTeamLoading && !teamLoadError && (
-            <>
-              {isTeamSaved && (
-                <p style={{ ...styles.message, ...styles.success }}>
-                  {"\u041a\u043e\u043c\u0430\u043d\u0434\u0430 \u0441\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u0430"}
-                </p>
-              )}
-
-              {teamSaveError && (
-                <p style={{ ...styles.message, ...styles.error }}>
-                  {"\u041e\u0448\u0438\u0431\u043a\u0430 \u0441\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u0438\u044f \u043a\u043e\u043c\u0430\u043d\u0434\u044b: "}
-                  {teamSaveError}
-                </p>
-              )}
-
-              <TeamForm
-                key={JSON.stringify(team)}
-                team={team}
-                isSaving={isTeamSaving}
-                onSubmit={handleTeamSubmit}
-              />
-            </>
+        <AdminSection
+          resource={platformTimelineResource}
+          loadingText="Загрузка таймлайна..."
+          loadErrorPrefix="Ошибка загрузки таймлайна: "
+          saveErrorPrefix="Ошибка сохранения таймлайна: "
+          successText="Таймлайн сохранён"
+        >
+          {(platformTimeline) => (
+            <PlatformTimelineForm
+              key={JSON.stringify(platformTimeline)}
+              platformTimeline={platformTimeline}
+              isSaving={platformTimelineResource.isSaving}
+              onSubmit={platformTimelineResource.save}
+            />
           )}
-        </section>
+        </AdminSection>
 
-        <section style={styles.adminSection}>
-          {isPlatformTimelineLoading && (
-            <p style={styles.message}>
-              {"\u0417\u0430\u0433\u0440\u0443\u0437\u043a\u0430 \u0442\u0430\u0439\u043c\u043b\u0430\u0439\u043d\u0430..."}
-            </p>
+        <AdminSection
+          resource={clientLogosResource}
+          loadingText="Загрузка логотипов..."
+          loadErrorPrefix="Ошибка загрузки логотипов: "
+          saveErrorPrefix="Ошибка сохранения логотипов: "
+          successText="Логотипы сохранены"
+        >
+          {(clientLogos) => (
+            <ClientLogosForm
+              key={JSON.stringify(clientLogos)}
+              clients={clientLogos}
+              isSaving={clientLogosResource.isSaving}
+              onSubmit={clientLogosResource.save}
+            />
           )}
+        </AdminSection>
 
-          {platformTimelineLoadError && (
-            <p style={{ ...styles.message, ...styles.error }}>
-              {"\u041e\u0448\u0438\u0431\u043a\u0430 \u0437\u0430\u0433\u0440\u0443\u0437\u043a\u0438 \u0442\u0430\u0439\u043c\u043b\u0430\u0439\u043d\u0430: "}
-              {platformTimelineLoadError}
-            </p>
+        <AdminSection
+          resource={directionsResource}
+          loadingText="Загрузка направлений..."
+          loadErrorPrefix="Ошибка загрузки направлений: "
+          saveErrorPrefix="Ошибка сохранения направлений: "
+          successText="Направления сохранены"
+        >
+          {(directions) => (
+            <DirectionsForm
+              key={JSON.stringify(directions)}
+              directions={directions}
+              isSaving={directionsResource.isSaving}
+              onSubmit={directionsResource.save}
+            />
           )}
+        </AdminSection>
 
-          {platformTimeline &&
-            !isPlatformTimelineLoading &&
-            !platformTimelineLoadError && (
-              <>
-                {isPlatformTimelineSaved && (
-                  <p style={{ ...styles.message, ...styles.success }}>
-                    {"\u0422\u0430\u0439\u043c\u043b\u0430\u0439\u043d \u0441\u043e\u0445\u0440\u0430\u043d\u0451\u043d"}
-                  </p>
-                )}
-
-                {platformTimelineSaveError && (
-                  <p style={{ ...styles.message, ...styles.error }}>
-                    {"\u041e\u0448\u0438\u0431\u043a\u0430 \u0441\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u0438\u044f \u0442\u0430\u0439\u043c\u043b\u0430\u0439\u043d\u0430: "}
-                    {platformTimelineSaveError}
-                  </p>
-                )}
-
-                <PlatformTimelineForm
-                  key={JSON.stringify(platformTimeline)}
-                  platformTimeline={platformTimeline}
-                  isSaving={isPlatformTimelineSaving}
-                  onSubmit={handlePlatformTimelineSubmit}
-                />
-              </>
-            )}
-        </section>
-
-        <section style={styles.adminSection}>
-          {isClientLogosLoading && (
-            <p style={styles.message}>
-              {"\u0417\u0430\u0433\u0440\u0443\u0437\u043a\u0430 \u043b\u043e\u0433\u043e\u0442\u0438\u043f\u043e\u0432..."}
-            </p>
+        <AdminSection
+          resource={vacanciesResource}
+          loadingText="Загрузка вакансий..."
+          loadErrorPrefix="Ошибка загрузки вакансий: "
+          saveErrorPrefix="Ошибка сохранения вакансий: "
+          successText="Вакансии сохранены"
+        >
+          {(vacancies) => (
+            <VacanciesForm
+              key={JSON.stringify(vacancies)}
+              vacancies={vacancies}
+              isSaving={vacanciesResource.isSaving}
+              onSubmit={vacanciesResource.save}
+            />
           )}
+        </AdminSection>
 
-          {clientLogosLoadError && (
-            <p style={{ ...styles.message, ...styles.error }}>
-              {"\u041e\u0448\u0438\u0431\u043a\u0430 \u0437\u0430\u0433\u0440\u0443\u0437\u043a\u0438 \u043b\u043e\u0433\u043e\u0442\u0438\u043f\u043e\u0432: "}
-              {clientLogosLoadError}
-            </p>
+        <AdminSection
+          resource={galleryResource}
+          loadingText="Загрузка галереи..."
+          loadErrorPrefix="Ошибка загрузки галереи: "
+          saveErrorPrefix="Ошибка сохранения галереи: "
+          successText="Галерея сохранена"
+        >
+          {(gallery) => (
+            <GalleryForm
+              key={JSON.stringify(gallery)}
+              gallery={gallery}
+              isSaving={galleryResource.isSaving}
+              onSubmit={galleryResource.save}
+            />
           )}
+        </AdminSection>
 
-          {clientLogos && !isClientLogosLoading && !clientLogosLoadError && (
-            <>
-              {isClientLogosSaved && (
-                <p style={{ ...styles.message, ...styles.success }}>
-                  {"\u041b\u043e\u0433\u043e\u0442\u0438\u043f\u044b \u0441\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u044b"}
-                </p>
-              )}
-
-              {clientLogosSaveError && (
-                <p style={{ ...styles.message, ...styles.error }}>
-                  {"\u041e\u0448\u0438\u0431\u043a\u0430 \u0441\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u0438\u044f \u043b\u043e\u0433\u043e\u0442\u0438\u043f\u043e\u0432: "}
-                  {clientLogosSaveError}
-                </p>
-              )}
-
-              <ClientLogosForm
-                key={JSON.stringify(clientLogos)}
-                clients={clientLogos}
-                isSaving={isClientLogosSaving}
-                onSubmit={handleClientLogosSubmit}
-              />
-            </>
+        <AdminSection
+          resource={officesResource}
+          loadingText="Загрузка офисов..."
+          loadErrorPrefix="Ошибка загрузки офисов: "
+          saveErrorPrefix="Ошибка сохранения офисов: "
+          successText="Офисы сохранены"
+        >
+          {(offices) => (
+            <OfficesForm
+              key={JSON.stringify(offices)}
+              offices={offices}
+              isSaving={officesResource.isSaving}
+              onSubmit={officesResource.save}
+            />
           )}
-        </section>
+        </AdminSection>
+
+        <AdminSection
+          resource={benefitsResource}
+          loadingText="Загрузка бонусов..."
+          loadErrorPrefix="Ошибка загрузки бонусов: "
+          saveErrorPrefix="Ошибка сохранения бонусов: "
+          successText="Бонусы сохранены"
+        >
+          {(benefits) => (
+            <BenefitsForm
+              key={JSON.stringify(benefits)}
+              benefits={benefits}
+              isSaving={benefitsResource.isSaving}
+              onSubmit={benefitsResource.save}
+            />
+          )}
+        </AdminSection>
+
+        <AdminSection
+          resource={contactResource}
+          loadingText="Загрузка контактов..."
+          loadErrorPrefix="Ошибка загрузки контактов: "
+          saveErrorPrefix="Ошибка сохранения контактов: "
+          successText="Контакты сохранены"
+        >
+          {(contact) => (
+            <ContactForm
+              key={JSON.stringify(contact)}
+              contact={contact}
+              isSaving={contactResource.isSaving}
+              onSubmit={contactResource.save}
+            />
+          )}
+        </AdminSection>
       </section>
     </main>
   );
