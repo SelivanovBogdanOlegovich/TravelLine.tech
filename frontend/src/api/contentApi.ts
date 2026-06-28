@@ -65,6 +65,18 @@ export type PlatformTimelineData = {
   items: PlatformTimelineItem[];
 };
 
+export type ClientLogo = {
+  id: number;
+  name: string;
+  logo: string;
+};
+
+export type ClientsData = {
+  title: string;
+  subtitle?: string;
+  items: ClientLogo[];
+};
+
 export type ContentData = {
   header?: {
     logo?: string;
@@ -91,6 +103,7 @@ export type ContentData = {
     members: TeamMember[];
   };
   platformTimeline?: PlatformTimelineData;
+  clients?: ClientsData;
   benefits?:
     | {
         title?: string;
@@ -148,3 +161,5 @@ export const getTeam = () => getJson<ContentData["team"]>("/api/team");
 
 export const getPlatformTimeline = () =>
   getJson<ContentData["platformTimeline"]>("/api/platform-timeline");
+
+export const getClients = () => getJson<ContentData["clients"]>("/api/clients");

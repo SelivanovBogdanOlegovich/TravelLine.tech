@@ -1,8 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
 import type { CSSProperties } from "react";
+import ClientLogosForm from "../forms/ClientLogosForm";
 import HeroForm from "../forms/HeroForm";
 import PlatformTimelineForm from "../forms/PlatformTimelineForm";
 import TeamForm from "../forms/TeamForm";
+import {
+  getAdminClientLogos,
+  updateAdminClientLogos,
+} from "../api/clientLogosAdminApi";
+import type { ClientLogosData } from "../api/clientLogosAdminApi";
 import { getAdminHero, updateAdminHero } from "../api/heroAdminApi";
 import type { HeroData } from "../api/heroAdminApi";
 import {
@@ -12,6 +18,7 @@ import {
 import type { PlatformTimelineData } from "../api/platformTimelineAdminApi";
 import { getAdminTeam, updateAdminTeam } from "../api/teamAdminApi";
 import type { TeamData } from "../api/teamAdminApi";
+import type { ClientLogosFormData } from "../types/clientLogosForm";
 import type { HeroFormData } from "../types/heroForm";
 import type { PlatformTimelineFormData } from "../types/platformTimelineForm";
 import type { TeamFormData } from "../types/teamForm";
@@ -35,6 +42,14 @@ const normalizePlatformTimeline = (
   title: platformTimeline.title,
   subtitle: platformTimeline.subtitle,
   items: platformTimeline.items,
+});
+
+const normalizeClientLogos = (
+  clients: ClientLogosData,
+): ClientLogosFormData => ({
+  title: clients.title,
+  subtitle: clients.subtitle,
+  items: clients.items,
 });
 
 const getErrorMessage = (error: unknown) =>
@@ -66,6 +81,17 @@ export default function AdminPage() {
     string | null
   >(null);
   const [isPlatformTimelineSaved, setIsPlatformTimelineSaved] = useState(false);
+  const [clientLogos, setClientLogos] =
+    useState<ClientLogosFormData | null>(null);
+  const [isClientLogosLoading, setIsClientLogosLoading] = useState(true);
+  const [clientLogosLoadError, setClientLogosLoadError] = useState<
+    string | null
+  >(null);
+  const [isClientLogosSaving, setIsClientLogosSaving] = useState(false);
+  const [clientLogosSaveError, setClientLogosSaveError] = useState<
+    string | null
+  >(null);
+  const [isClientLogosSaved, setIsClientLogosSaved] = useState(false);
 
   const loadHero = useCallback(async () => {
     try {
@@ -106,6 +132,19 @@ export default function AdminPage() {
     }
   }, []);
 
+  const loadClientLogos = useCallback(async () => {
+    try {
+      const clientLogosData = await getAdminClientLogos();
+
+      setClientLogos(normalizeClientLogos(clientLogosData));
+      setClientLogosLoadError(null);
+    } catch (error) {
+      setClientLogosLoadError(getErrorMessage(error));
+    } finally {
+      setIsClientLogosLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     const heroTimeoutId = window.setTimeout(() => {
       void loadHero();
@@ -116,13 +155,17 @@ export default function AdminPage() {
     const platformTimelineTimeoutId = window.setTimeout(() => {
       void loadPlatformTimeline();
     }, 0);
+    const clientLogosTimeoutId = window.setTimeout(() => {
+      void loadClientLogos();
+    }, 0);
 
     return () => {
       window.clearTimeout(heroTimeoutId);
       window.clearTimeout(teamTimeoutId);
       window.clearTimeout(platformTimelineTimeoutId);
+      window.clearTimeout(clientLogosTimeoutId);
     };
-  }, [loadHero, loadTeam, loadPlatformTimeline]);
+  }, [loadHero, loadTeam, loadPlatformTimeline, loadClientLogos]);
 
   const handleHeroSubmit = async (heroData: HeroFormData) => {
     setIsSaving(true);
@@ -171,6 +214,24 @@ export default function AdminPage() {
       setPlatformTimelineSaveError(getErrorMessage(error));
     } finally {
       setIsPlatformTimelineSaving(false);
+    }
+  };
+
+  const handleClientLogosSubmit = async (
+    clientLogosData: ClientLogosFormData,
+  ) => {
+    setIsClientLogosSaving(true);
+    setClientLogosSaveError(null);
+    setIsClientLogosSaved(false);
+
+    try {
+      await updateAdminClientLogos(clientLogosData);
+      await loadClientLogos();
+      setIsClientLogosSaved(true);
+    } catch (error) {
+      setClientLogosSaveError(getErrorMessage(error));
+    } finally {
+      setIsClientLogosSaving(false);
     }
   };
 
@@ -298,6 +359,45 @@ export default function AdminPage() {
                 />
               </>
             )}
+        </section>
+
+        <section style={styles.adminSection}>
+          {isClientLogosLoading && (
+            <p style={styles.message}>
+              {"\u0417\u0430\u0433\u0440\u0443\u0437\u043a\u0430 \u043b\u043e\u0433\u043e\u0442\u0438\u043f\u043e\u0432..."}
+            </p>
+          )}
+
+          {clientLogosLoadError && (
+            <p style={{ ...styles.message, ...styles.error }}>
+              {"\u041e\u0448\u0438\u0431\u043a\u0430 \u0437\u0430\u0433\u0440\u0443\u0437\u043a\u0438 \u043b\u043e\u0433\u043e\u0442\u0438\u043f\u043e\u0432: "}
+              {clientLogosLoadError}
+            </p>
+          )}
+
+          {clientLogos && !isClientLogosLoading && !clientLogosLoadError && (
+            <>
+              {isClientLogosSaved && (
+                <p style={{ ...styles.message, ...styles.success }}>
+                  {"\u041b\u043e\u0433\u043e\u0442\u0438\u043f\u044b \u0441\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u044b"}
+                </p>
+              )}
+
+              {clientLogosSaveError && (
+                <p style={{ ...styles.message, ...styles.error }}>
+                  {"\u041e\u0448\u0438\u0431\u043a\u0430 \u0441\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u0438\u044f \u043b\u043e\u0433\u043e\u0442\u0438\u043f\u043e\u0432: "}
+                  {clientLogosSaveError}
+                </p>
+              )}
+
+              <ClientLogosForm
+                key={JSON.stringify(clientLogos)}
+                clients={clientLogos}
+                isSaving={isClientLogosSaving}
+                onSubmit={handleClientLogosSubmit}
+              />
+            </>
+          )}
         </section>
       </section>
     </main>

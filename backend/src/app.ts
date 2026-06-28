@@ -1,6 +1,7 @@
 import express, { NextFunction, Request, Response } from "express";
 import aboutRouter from "./routes/about.route";
 import benefitsRouter from "./routes/benefits.route";
+import clientsRouter from "./routes/clients.route";
 import contentRouter from "./routes/content.route";
 import ctaRouter from "./routes/cta.route";
 import directionsRouter from "./routes/directions.route";
@@ -26,6 +27,7 @@ app.use("/api/directions", directionsRouter);
 app.use("/api/about", aboutRouter);
 app.use("/api/team", teamRouter);
 app.use("/api/platform-timeline", platformTimelineRouter);
+app.use("/api/clients", clientsRouter);
 app.use("/api/benefits", benefitsRouter);
 app.use("/api/testimonials", testimonialsRouter);
 app.use("/api/cta", ctaRouter);

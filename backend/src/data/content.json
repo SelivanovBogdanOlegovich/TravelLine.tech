@@ -120,6 +120,57 @@
       }
     ]
   },
+  "clients": {
+    "title": "Нам доверяют отели и сети",
+    "subtitle": "Платформу TravelLine используют отельеры в разных городах и странах",
+    "items": [
+      {
+        "id": 1,
+        "name": "Nord Hotel",
+        "logo": "/clients/nord-hotel.svg"
+      },
+      {
+        "id": 2,
+        "name": "River Inn",
+        "logo": "/clients/river-inn.svg"
+      },
+      {
+        "id": 3,
+        "name": "City Rooms",
+        "logo": "/clients/city-rooms.svg"
+      },
+      {
+        "id": 4,
+        "name": "Grand Resort",
+        "logo": "/clients/grand-resort.svg"
+      },
+      {
+        "id": 5,
+        "name": "Skyline Apart",
+        "logo": "/clients/skyline-apart.svg"
+      },
+      {
+        "id": 6,
+        "name": "Forest Lodge",
+        "logo": "/clients/forest-lodge.svg"
+      },
+      {
+        "id": 7,
+        "name": "Harbor Suites",
+        "logo": "/clients/harbor-suites.svg"
+      },
+      {
+        "id": 8,
+        "name": "Atlas Hotels",
+        "logo": "/clients/atlas-hotels.svg"
+      },
+      {
+        "id": 9,
+        "name": "Bogdan",
+        "logo": ""
+      }
+    ]
+  },
   "benefits": [
     {
       "id": 1,
