@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="560" viewBox="0 0 900 560" role="img" aria-labelledby="title desc">
+  <title id="title">Yoshkar-Ola office</title>
+  <desc id="desc">Minimal office illustration</desc>
+  <rect width="900" height="560" fill="#dbeafe"/>
+  <rect x="90" y="116" width="720" height="332" rx="38" fill="#ffffff"/>
+  <rect x="138" y="172" width="170" height="210" rx="18" fill="#2563eb"/>
+  <rect x="350" y="172" width="170" height="210" rx="18" fill="#60a5fa"/>
+  <rect x="562" y="172" width="170" height="210" rx="18" fill="#93c5fd"/>
+</svg>

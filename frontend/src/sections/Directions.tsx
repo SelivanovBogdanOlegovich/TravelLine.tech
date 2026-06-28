@@ -11,14 +11,14 @@ export default function Directions({ directions }: DirectionsProps) {
       <h2 style={styles.title}>Directions</h2>
 
       <div style={styles.grid}>
-        {directions.map((item, i) => (
-          <div key={i} style={styles.card}>
+        {directions.map((item) => (
+          <div key={item.id} style={styles.card}>
             <h3>{item.title}</h3>
             <p>{item.description}</p>
 
             <div style={styles.tags}>
-              {(item.tags ?? []).map((tag, j) => (
-                <span key={j} style={styles.tag}>
+              {(item.tags ?? []).map((tag) => (
+                <span key={tag} style={styles.tag}>
                   {tag}
                 </span>
               ))}

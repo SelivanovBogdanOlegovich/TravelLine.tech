@@ -12,8 +12,8 @@ export default function Vacancies({ vacancies }: VacanciesProps) {
         <h2 style={styles.title}>Vacancies</h2>
 
         <div style={styles.list}>
-          {vacancies.map((job, i) => (
-            <div key={i} style={styles.card}>
+          {vacancies.map((job) => (
+            <div key={job.id} style={styles.card}>
               <div>
                 <h3 style={styles.jobTitle}>{job.title}</h3>
 
@@ -21,8 +21,8 @@ export default function Vacancies({ vacancies }: VacanciesProps) {
                 <p style={styles.meta}>{job.type}</p>
 
                 <div style={styles.stack}>
-                  {(job.stack ?? []).map((s, j) => (
-                    <span key={j} style={styles.tag}>
+                  {(job.stack ?? []).map((s) => (
+                    <span key={s} style={styles.tag}>
                       {s}
                     </span>
                   ))}

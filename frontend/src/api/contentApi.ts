@@ -9,12 +9,14 @@ export type StatItem = {
 };
 
 export type Direction = {
+  id: number;
   title: string;
   description: string;
   tags?: string[];
 };
 
 export type Vacancy = {
+  id: number;
   title: string;
   location: string;
   type: string;
@@ -22,6 +24,7 @@ export type Vacancy = {
 };
 
 export type Benefit = {
+  id: number;
   title: string;
   text?: string;
   description?: string;
@@ -77,6 +80,38 @@ export type ClientsData = {
   items: ClientLogo[];
 };
 
+export type GalleryItem = {
+  id: number;
+  caption: string;
+  media: string;
+  type: "image" | "video";
+};
+
+export type GalleryData = {
+  title: string;
+  subtitle?: string;
+  items: GalleryItem[];
+};
+
+export type OfficeItem = {
+  id: number;
+  city: string;
+  description: string;
+  photo: string;
+};
+
+export type OfficesData = {
+  title: string;
+  subtitle?: string;
+  items: OfficeItem[];
+};
+
+export type ContactData = {
+  title: string;
+  subtitle?: string;
+  buttonText: string;
+};
+
 export type ContentData = {
   header?: {
     logo?: string;
@@ -104,12 +139,14 @@ export type ContentData = {
   };
   platformTimeline?: PlatformTimelineData;
   clients?: ClientsData;
-  benefits?:
-    | {
-        title?: string;
-        items?: Benefit[];
-      }
-    | Benefit[];
+  gallery?: GalleryData;
+  offices?: OfficesData;
+  benefits?: {
+    title: string;
+    subtitle?: string;
+    items: Benefit[];
+  };
+  contact?: ContactData;
   testimonials?:
     | {
         title?: string;
@@ -163,3 +200,12 @@ export const getPlatformTimeline = () =>
   getJson<ContentData["platformTimeline"]>("/api/platform-timeline");
 
 export const getClients = () => getJson<ContentData["clients"]>("/api/clients");
+
+export const getGallery = () =>
+  getJson<ContentData["gallery"]>("/api/gallery");
+
+export const getOffices = () =>
+  getJson<ContentData["offices"]>("/api/offices");
+
+export const getContact = () =>
+  getJson<ContentData["contact"]>("/api/contact");

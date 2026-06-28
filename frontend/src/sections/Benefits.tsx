@@ -6,18 +6,20 @@ type BenefitsProps = {
 };
 
 export default function Benefits({ benefits }: BenefitsProps) {
-  const title = Array.isArray(benefits) ? "Benefits" : benefits?.title;
-  const items: Benefit[] = Array.isArray(benefits)
-    ? benefits
-    : benefits?.items ?? [];
+  const items: Benefit[] = benefits?.items ?? [];
+
+  if (!benefits || items.length === 0) {
+    return null;
+  }
 
   return (
     <section style={styles.section}>
-      <h2 style={styles.title}>{title}</h2>
+      <h2 style={styles.title}>{benefits.title}</h2>
+      {benefits.subtitle && <p style={styles.subtitle}>{benefits.subtitle}</p>}
 
       <div style={styles.grid}>
-        {items.map((item, i) => (
-          <div key={i} style={styles.card}>
+        {items.map((item) => (
+          <div key={item.id} style={styles.card}>
             <h3>{item.title}</h3>
             <p style={{ opacity: 0.7 }}>{item.text ?? item.description}</p>
           </div>
@@ -36,7 +38,17 @@ const styles: Record<string, CSSProperties> = {
 
   title: {
     fontSize: "32px",
-    marginBottom: "40px"
+    margin: "0 0 14px",
+    textAlign: "center"
+  },
+
+  subtitle: {
+    maxWidth: "680px",
+    margin: "0 auto 40px",
+    color: "#c9cdd6",
+    fontSize: "17px",
+    lineHeight: 1.6,
+    textAlign: "center"
   },
 
   grid: {
