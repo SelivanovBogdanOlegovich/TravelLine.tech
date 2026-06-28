@@ -1,12 +1,19 @@
 import { useCallback, useEffect, useState } from "react";
 import type { CSSProperties } from "react";
 import HeroForm from "../forms/HeroForm";
+import PlatformTimelineForm from "../forms/PlatformTimelineForm";
 import TeamForm from "../forms/TeamForm";
 import { getAdminHero, updateAdminHero } from "../api/heroAdminApi";
 import type { HeroData } from "../api/heroAdminApi";
+import {
+  getAdminPlatformTimeline,
+  updateAdminPlatformTimeline,
+} from "../api/platformTimelineAdminApi";
+import type { PlatformTimelineData } from "../api/platformTimelineAdminApi";
 import { getAdminTeam, updateAdminTeam } from "../api/teamAdminApi";
 import type { TeamData } from "../api/teamAdminApi";
 import type { HeroFormData } from "../types/heroForm";
+import type { PlatformTimelineFormData } from "../types/platformTimelineForm";
 import type { TeamFormData } from "../types/teamForm";
 
 const normalizeHero = (hero: HeroData): HeroFormData => ({
@@ -20,6 +27,14 @@ const normalizeTeam = (team: TeamData): TeamFormData => ({
   title: team.title,
   subtitle: team.subtitle,
   members: team.members,
+});
+
+const normalizePlatformTimeline = (
+  platformTimeline: PlatformTimelineData,
+): PlatformTimelineFormData => ({
+  title: platformTimeline.title,
+  subtitle: platformTimeline.subtitle,
+  items: platformTimeline.items,
 });
 
 const getErrorMessage = (error: unknown) =>
@@ -38,6 +53,19 @@ export default function AdminPage() {
   const [isTeamSaving, setIsTeamSaving] = useState(false);
   const [teamSaveError, setTeamSaveError] = useState<string | null>(null);
   const [isTeamSaved, setIsTeamSaved] = useState(false);
+  const [platformTimeline, setPlatformTimeline] =
+    useState<PlatformTimelineFormData | null>(null);
+  const [isPlatformTimelineLoading, setIsPlatformTimelineLoading] =
+    useState(true);
+  const [platformTimelineLoadError, setPlatformTimelineLoadError] = useState<
+    string | null
+  >(null);
+  const [isPlatformTimelineSaving, setIsPlatformTimelineSaving] =
+    useState(false);
+  const [platformTimelineSaveError, setPlatformTimelineSaveError] = useState<
+    string | null
+  >(null);
+  const [isPlatformTimelineSaved, setIsPlatformTimelineSaved] = useState(false);
 
   const loadHero = useCallback(async () => {
     try {
@@ -65,6 +93,19 @@ export default function AdminPage() {
     }
   }, []);
 
+  const loadPlatformTimeline = useCallback(async () => {
+    try {
+      const platformTimelineData = await getAdminPlatformTimeline();
+
+      setPlatformTimeline(normalizePlatformTimeline(platformTimelineData));
+      setPlatformTimelineLoadError(null);
+    } catch (error) {
+      setPlatformTimelineLoadError(getErrorMessage(error));
+    } finally {
+      setIsPlatformTimelineLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     const heroTimeoutId = window.setTimeout(() => {
       void loadHero();
@@ -72,12 +113,16 @@ export default function AdminPage() {
     const teamTimeoutId = window.setTimeout(() => {
       void loadTeam();
     }, 0);
+    const platformTimelineTimeoutId = window.setTimeout(() => {
+      void loadPlatformTimeline();
+    }, 0);
 
     return () => {
       window.clearTimeout(heroTimeoutId);
       window.clearTimeout(teamTimeoutId);
+      window.clearTimeout(platformTimelineTimeoutId);
     };
-  }, [loadHero, loadTeam]);
+  }, [loadHero, loadTeam, loadPlatformTimeline]);
 
   const handleHeroSubmit = async (heroData: HeroFormData) => {
     setIsSaving(true);
@@ -108,6 +153,24 @@ export default function AdminPage() {
       setTeamSaveError(getErrorMessage(error));
     } finally {
       setIsTeamSaving(false);
+    }
+  };
+
+  const handlePlatformTimelineSubmit = async (
+    platformTimelineData: PlatformTimelineFormData,
+  ) => {
+    setIsPlatformTimelineSaving(true);
+    setPlatformTimelineSaveError(null);
+    setIsPlatformTimelineSaved(false);
+
+    try {
+      await updateAdminPlatformTimeline(platformTimelineData);
+      await loadPlatformTimeline();
+      setIsPlatformTimelineSaved(true);
+    } catch (error) {
+      setPlatformTimelineSaveError(getErrorMessage(error));
+    } finally {
+      setIsPlatformTimelineSaving(false);
     }
   };
 
@@ -194,6 +257,47 @@ export default function AdminPage() {
               />
             </>
           )}
+        </section>
+
+        <section style={styles.adminSection}>
+          {isPlatformTimelineLoading && (
+            <p style={styles.message}>
+              {"\u0417\u0430\u0433\u0440\u0443\u0437\u043a\u0430 \u0442\u0430\u0439\u043c\u043b\u0430\u0439\u043d\u0430..."}
+            </p>
+          )}
+
+          {platformTimelineLoadError && (
+            <p style={{ ...styles.message, ...styles.error }}>
+              {"\u041e\u0448\u0438\u0431\u043a\u0430 \u0437\u0430\u0433\u0440\u0443\u0437\u043a\u0438 \u0442\u0430\u0439\u043c\u043b\u0430\u0439\u043d\u0430: "}
+              {platformTimelineLoadError}
+            </p>
+          )}
+
+          {platformTimeline &&
+            !isPlatformTimelineLoading &&
+            !platformTimelineLoadError && (
+              <>
+                {isPlatformTimelineSaved && (
+                  <p style={{ ...styles.message, ...styles.success }}>
+                    {"\u0422\u0430\u0439\u043c\u043b\u0430\u0439\u043d \u0441\u043e\u0445\u0440\u0430\u043d\u0451\u043d"}
+                  </p>
+                )}
+
+                {platformTimelineSaveError && (
+                  <p style={{ ...styles.message, ...styles.error }}>
+                    {"\u041e\u0448\u0438\u0431\u043a\u0430 \u0441\u043e\u0445\u0440\u0430\u043d\u0435\u043d\u0438\u044f \u0442\u0430\u0439\u043c\u043b\u0430\u0439\u043d\u0430: "}
+                    {platformTimelineSaveError}
+                  </p>
+                )}
+
+                <PlatformTimelineForm
+                  key={JSON.stringify(platformTimeline)}
+                  platformTimeline={platformTimeline}
+                  isSaving={isPlatformTimelineSaving}
+                  onSubmit={handlePlatformTimelineSubmit}
+                />
+              </>
+            )}
         </section>
       </section>
     </main>

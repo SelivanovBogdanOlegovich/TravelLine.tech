@@ -10,7 +10,13 @@
   },
   "hero": {
     "title": "TravelLine",
-    "subtitle": "Современная платформа для управления отельным бизнесом"
+    "subtitle": "Современная платформа для управления отельным бизнесом",
+    "stats": [
+      {
+        "label": "степа",
+        "value": "56"
+      }
+    ]
   },
   "directions": [
     {
@@ -27,6 +33,92 @@
   "about": {
     "title": "О компании",
     "description": "TravelLine разрабатывает IT-решения для отельного бизнеса"
+  },
+  "team": {
+    "title": "Любим и бережем свою команду",
+    "subtitle": "В TravelLine мы ценим людей, их рост и вклад в общее дело",
+    "members": [
+      {
+        "id": 2,
+        "name": "Михаил Орлов",
+        "position": "Backend Engineer",
+        "photo": "/team/mikhail.svg",
+        "socials": [
+          {
+            "label": "Telegram",
+            "url": "https://t.me/"
+          },
+          {
+            "label": "GitHub",
+            "url": "https://github.com/"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "name": "Елена Смирнова",
+        "position": "Product Designer",
+        "photo": "/team/elena.svg",
+        "socials": [
+          {
+            "label": "Behance",
+            "url": "https://www.behance.net/"
+          },
+          {
+            "label": "LinkedIn",
+            "url": "https://www.linkedin.com/"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "name": "Степан",
+        "position": "Фумс",
+        "photo": "",
+        "socials": []
+      }
+    ]
+  },
+  "platformTimeline": {
+    "title": "Развиваем платформу",
+    "subtitle": "Шаг за шагом создаем продукты, которые помогают отелям расти и упрощать ежедневную работу",
+    "items": [
+      {
+        "id": 1,
+        "year": "2008",
+        "title": "TravelLine Booking Engine",
+        "description": "Запустили модуль онлайн-бронирования, который помогает отелям принимать прямые продажи.",
+        "markerType": "launch"
+      },
+      {
+        "id": 2,
+        "year": "2013",
+        "title": "Единая платформа",
+        "description": "Объединили каналы продаж, сайт отеля и модули управления в одну экосистему.",
+        "markerType": "platform"
+      },
+      {
+        "id": 3,
+        "year": "2018",
+        "title": "Новые модули",
+        "description": "Добавили инструменты для CRM, аналитики и гибкого управления тарифами.",
+        "markerType": "module"
+      },
+      {
+        "id": 4,
+        "year": "2024",
+        "title": "Выход на новые рынки",
+        "description": "Расширили платформу для отелей в разных странах и добавили новые интеграции.",
+        "markerType": "market"
+      },
+      {
+        "id": 5,
+        "year": "2026",
+        "title": "практика для студентов",
+        "description": "практика для студентов политеха",
+        "markerType": "market"
+      }
+    ]
   },
   "benefits": [
     {

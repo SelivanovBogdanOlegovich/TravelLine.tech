@@ -38,6 +38,33 @@ export type FooterLink = {
   url: string;
 };
 
+export type TeamSocial = {
+  label: string;
+  url: string;
+};
+
+export type TeamMember = {
+  id: number;
+  name: string;
+  position: string;
+  photo: string;
+  socials: TeamSocial[];
+};
+
+export type PlatformTimelineItem = {
+  id: number;
+  year: string;
+  title: string;
+  description: string;
+  markerType: string;
+};
+
+export type PlatformTimelineData = {
+  title: string;
+  subtitle?: string;
+  items: PlatformTimelineItem[];
+};
+
 export type ContentData = {
   header?: {
     logo?: string;
@@ -58,6 +85,12 @@ export type ContentData = {
     text?: string;
     description?: string;
   };
+  team?: {
+    title: string;
+    subtitle?: string;
+    members: TeamMember[];
+  };
+  platformTimeline?: PlatformTimelineData;
   benefits?:
     | {
         title?: string;
@@ -110,3 +143,8 @@ export const getHero = () => getJson<ContentData["hero"]>("/api/hero");
 
 export const getVacancies = () =>
   getJson<ContentData["vacancies"]>("/api/vacancies");
+
+export const getTeam = () => getJson<ContentData["team"]>("/api/team");
+
+export const getPlatformTimeline = () =>
+  getJson<ContentData["platformTimeline"]>("/api/platform-timeline");

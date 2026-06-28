@@ -9,6 +9,8 @@ import Hero from "../sections/Hero";
 import Directions from "../sections/Directions";
 import Vacancies from "../sections/Vacancies";
 import About from "../sections/About";
+import Team from "../sections/Team";
+import PlatformTimeline from "../sections/PlatformTimeline";
 import Benefits from "../sections/Benefits";
 import Testimonials from "../sections/Testimonials";
 import CTA from "../sections/CTA";
@@ -74,6 +76,8 @@ export default function HomePage() {
       <Directions directions={content.directions ?? []} />
       <Vacancies vacancies={content.vacancies ?? []} />
       <About about={content.about} />
+      <Team team={content.team} />
+      <PlatformTimeline platformTimeline={content.platformTimeline} />
       <Benefits benefits={content.benefits} />
       <Testimonials testimonials={content.testimonials} />
       <CTA cta={content.cta} />
