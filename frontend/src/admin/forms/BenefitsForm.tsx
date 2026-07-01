@@ -3,6 +3,7 @@ import type { FormEvent } from "react";
 import type { Benefit } from "../../api/contentApi";
 import type { BenefitsFormData } from "../types/benefitsForm";
 import { formStyles as styles } from "./formStyles";
+import { animateAdminRemoval, scrollToFormSubmit } from "./scrollHelpers";
 
 type BenefitsFormProps = {
   benefits: BenefitsFormData;
@@ -62,6 +63,7 @@ export default function BenefitsForm({
       ...current,
       items: [...current.items, createBenefit(current.items)],
     }));
+    scrollToFormSubmit();
   };
 
   const removeBenefit = (benefitIndex: number) => {
@@ -111,15 +113,20 @@ export default function BenefitsForm({
 
         <div style={styles.itemsList}>
           {formData.items.map((benefit, benefitIndex) => (
-            <article key={benefit.id} style={styles.itemCard}>
+            <article key={benefit.id} data-admin-item style={styles.itemCard}>
               <div style={styles.itemHeader}>
                 <h4 style={styles.itemTitle}>
                   {benefit.title || "Новый бонус"}
                 </h4>
                 <button
                   type="button"
+                  className="admin-remove-button"
                   style={styles.removeButton}
-                  onClick={() => removeBenefit(benefitIndex)}
+                  onClick={(event) =>
+                    animateAdminRemoval(event, () =>
+                      removeBenefit(benefitIndex),
+                    )
+                  }
                 >
                   Удалить бонус
                 </button>

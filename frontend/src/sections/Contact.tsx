@@ -1,5 +1,6 @@
 import type { CSSProperties, FormEvent } from "react";
 import type { ContentData } from "../api/contentApi";
+import { container, lightCard, page, primaryButton } from "./publicStyles";
 
 type ContactProps = {
   contact: ContentData["contact"];
@@ -15,19 +16,16 @@ export default function Contact({ contact }: ContactProps) {
   };
 
   return (
-    <section style={styles.section}>
+    <section id="contact" style={styles.section}>
       <div style={styles.container}>
         <div style={styles.copy}>
-          <p style={styles.eyebrow}>Contact</p>
           <h2 style={styles.title}>{contact.title}</h2>
-          {contact.subtitle && (
-            <p style={styles.subtitle}>{contact.subtitle}</p>
-          )}
+          {contact.subtitle && <p style={styles.subtitle}>{contact.subtitle}</p>}
         </div>
 
         <form style={styles.form} onSubmit={handleSubmit}>
           <label style={styles.field}>
-            <span style={styles.label}>Name</span>
+            <span style={styles.label}>Имя</span>
             <input style={styles.input} name="name" type="text" />
           </label>
 
@@ -37,8 +35,8 @@ export default function Contact({ contact }: ContactProps) {
           </label>
 
           <label style={styles.field}>
-            <span style={styles.label}>Message</span>
-            <textarea style={{ ...styles.input, ...styles.textarea }} />
+            <span style={styles.label}>Сообщение</span>
+            <textarea style={{ ...styles.input, ...styles.textarea }} name="message" />
           </label>
 
           <button type="submit" style={styles.button}>
@@ -52,89 +50,84 @@ export default function Contact({ contact }: ContactProps) {
 
 const styles: Record<string, CSSProperties> = {
   section: {
-    padding: "96px 40px",
-    background: "#f0f5ff",
-    color: "#11141b",
+    width: "100%",
+    padding: "108px 0",
+    background: "linear-gradient(135deg, #eaf4ff 0%, #f7faff 100%)",
+    color: page.lightText,
   },
 
   container: {
-    maxWidth: "1120px",
-    margin: "0 auto",
+    ...container,
     display: "grid",
-    gridTemplateColumns: "0.9fr 1.1fr",
-    gap: "48px",
+    gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 360px), 1fr))",
+    gap: "56px",
     alignItems: "start",
   },
 
   copy: {
-    position: "sticky",
-    top: "32px",
+    maxWidth: "520px",
   },
 
   eyebrow: {
-    margin: "0 0 12px",
-    color: "#667085",
-    fontSize: "14px",
+    marginBottom: "14px",
+    color: page.accent,
+    fontSize: "12px",
+    fontWeight: 800,
     textTransform: "uppercase",
     letterSpacing: 0,
   },
 
   title: {
-    margin: "0 0 16px",
-    fontSize: "42px",
-    lineHeight: 1.1,
+    color: page.lightText,
+    fontSize: "clamp(34px, 5vw, 52px)",
+    lineHeight: 1.08,
+    fontWeight: 900,
   },
 
   subtitle: {
-    margin: 0,
-    color: "#536071",
+    marginTop: "18px",
+    color: page.lightSoftText,
     fontSize: "18px",
-    lineHeight: 1.6,
+    lineHeight: 1.7,
   },
 
   form: {
+    ...lightCard,
     display: "grid",
     gap: "18px",
-    padding: "28px",
-    borderRadius: "18px",
-    background: "white",
-    boxShadow: "0 20px 60px rgba(25, 40, 70, 0.12)",
+    padding: "32px",
   },
 
   field: {
     display: "grid",
-    gap: "8px",
+    gap: "9px",
+    textAlign: "left",
   },
 
   label: {
-    color: "#536071",
+    color: page.lightSoftText,
     fontSize: "14px",
+    fontWeight: 700,
   },
 
   input: {
     width: "100%",
-    boxSizing: "border-box",
-    padding: "13px 14px",
+    padding: "14px 16px",
     border: "1px solid #d7deea",
-    borderRadius: "10px",
-    background: "#f9fbff",
-    color: "#11141b",
-    font: "inherit",
+    borderRadius: "14px",
+    outline: "none",
+    background: "#f8fafc",
+    color: page.lightText,
+    fontSize: "16px",
   },
 
   textarea: {
-    minHeight: "132px",
+    minHeight: "138px",
     resize: "vertical",
   },
 
   button: {
+    ...primaryButton,
     justifySelf: "start",
-    padding: "13px 22px",
-    border: 0,
-    borderRadius: "10px",
-    background: "#11141b",
-    color: "white",
-    cursor: "pointer",
-    fontWeight: 700,
   },
 };

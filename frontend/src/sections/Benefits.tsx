@@ -1,5 +1,6 @@
-import type { Benefit, ContentData } from "../api/contentApi";
 import type { CSSProperties } from "react";
+import type { Benefit, ContentData } from "../api/contentApi";
+import { container, lightCard, lightSubtitle, lightTitle, page, sectionHeader } from "./publicStyles";
 
 type BenefitsProps = {
   benefits: ContentData["benefits"];
@@ -13,17 +14,22 @@ export default function Benefits({ benefits }: BenefitsProps) {
   }
 
   return (
-    <section style={styles.section}>
-      <h2 style={styles.title}>{benefits.title}</h2>
-      {benefits.subtitle && <p style={styles.subtitle}>{benefits.subtitle}</p>}
+    <section id="benefits" style={styles.section}>
+      <div style={styles.container}>
+        <div style={styles.header}>
+          <h2 style={styles.title}>{benefits.title}</h2>
+          {benefits.subtitle && <p style={styles.subtitle}>{benefits.subtitle}</p>}
+        </div>
 
-      <div style={styles.grid}>
-        {items.map((item) => (
-          <div key={item.id} style={styles.card}>
-            <h3>{item.title}</h3>
-            <p style={{ opacity: 0.7 }}>{item.text ?? item.description}</p>
-          </div>
-        ))}
+        <div style={styles.grid}>
+          {items.map((item) => (
+            <article key={item.id} style={styles.card}>
+              <span style={styles.icon}>{item.id}</span>
+              <h3 style={styles.cardTitle}>{item.title}</h3>
+              <p style={styles.description}>{item.text ?? item.description}</p>
+            </article>
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -31,36 +37,65 @@ export default function Benefits({ benefits }: BenefitsProps) {
 
 const styles: Record<string, CSSProperties> = {
   section: {
-    padding: "80px 40px",
-    background: "#111217",
-    color: "white"
+    width: "100%",
+    padding: "104px 0",
+    background: page.lightSoft,
+    color: page.lightText,
   },
 
-  title: {
-    fontSize: "32px",
-    margin: "0 0 14px",
-    textAlign: "center"
+  container: container,
+
+  header: sectionHeader,
+
+  eyebrow: {
+    marginBottom: "14px",
+    color: page.accent,
+    fontSize: "12px",
+    fontWeight: 800,
+    textTransform: "uppercase",
+    letterSpacing: 0,
   },
 
-  subtitle: {
-    maxWidth: "680px",
-    margin: "0 auto 40px",
-    color: "#c9cdd6",
-    fontSize: "17px",
-    lineHeight: 1.6,
-    textAlign: "center"
-  },
+  title: lightTitle,
+
+  subtitle: lightSubtitle,
 
   grid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-    gap: "20px"
+    gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+    gap: "22px",
+    marginTop: "50px",
   },
 
   card: {
-    padding: "20px",
-    border: "1px solid #2a2a2a",
-    borderRadius: "12px",
-    background: "#0d0f14"
-  }
+    ...lightCard,
+    padding: "30px",
+    textAlign: "left",
+  },
+
+  icon: {
+    display: "grid",
+    placeItems: "center",
+    width: "42px",
+    height: "42px",
+    borderRadius: "14px",
+    background: page.softBlue,
+    color: page.accent,
+    fontWeight: 900,
+  },
+
+  cardTitle: {
+    marginTop: "22px",
+    color: page.lightText,
+    fontSize: "22px",
+    lineHeight: 1.25,
+    fontWeight: 800,
+  },
+
+  description: {
+    marginTop: "12px",
+    color: page.lightSoftText,
+    fontSize: "16px",
+    lineHeight: 1.65,
+  },
 };

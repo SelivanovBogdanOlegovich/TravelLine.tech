@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import BenefitsForm from "../forms/BenefitsForm";
 import ClientLogosForm from "../forms/ClientLogosForm";
@@ -55,6 +55,31 @@ import type { OfficesFormData } from "../types/officesForm";
 import type { PlatformTimelineFormData } from "../types/platformTimelineForm";
 import type { TeamFormData } from "../types/teamForm";
 import type { VacanciesFormData } from "../types/vacanciesForm";
+import {
+  container,
+  lightCard,
+  page,
+  secondaryButton,
+} from "../../sections/publicStyles";
+
+type AdminBlockId =
+  | "hero"
+  | "team"
+  | "platform-timeline"
+  | "clients"
+  | "directions"
+  | "vacancies"
+  | "gallery"
+  | "offices"
+  | "benefits"
+  | "contact";
+
+type AdminBlock = {
+  id: AdminBlockId;
+  title: string;
+  description: string;
+  kind: "Простой блок" | "Список" | "Группированный список";
+};
 
 type AdminResource<FormData> = {
   data: FormData | null;
@@ -72,8 +97,82 @@ type AdminSectionProps<FormData> = {
   loadErrorPrefix: string;
   saveErrorPrefix: string;
   successText: string;
-  children: (data: FormData) => ReactNode;
+  children: (data: FormData, resource: AdminResource<FormData>) => ReactNode;
 };
+
+type AdminResourceEditorProps<ApiData, FormData> = Omit<
+  AdminSectionProps<FormData>,
+  "resource"
+> & {
+    loadResource: () => Promise<ApiData>;
+    updateResource: (data: FormData) => Promise<ApiData>;
+    normalize: (data: ApiData) => FormData;
+  };
+
+const adminBlocks: AdminBlock[] = [
+  {
+    id: "hero",
+    title: "Hero",
+    description: "Заголовок, подзаголовок, кнопка и статистика первого экрана.",
+    kind: "Простой блок",
+  },
+  {
+    id: "team",
+    title: "Команда",
+    description: "Сотрудники, должности, фотографии и социальные ссылки.",
+    kind: "Список",
+  },
+  {
+    id: "platform-timeline",
+    title: "Развиваем платформу",
+    description: "Годы, события таймлайна, описания и типы меток.",
+    kind: "Группированный список",
+  },
+  {
+    id: "clients",
+    title: "Логотипы клиентов",
+    description: "Название клиента и путь к логотипу для бегущей строки.",
+    kind: "Список",
+  },
+  {
+    id: "directions",
+    title: "Направления",
+    description: "Карточки направлений и технологические теги.",
+    kind: "Список",
+  },
+  {
+    id: "vacancies",
+    title: "Вакансии",
+    description: "Открытые позиции, формат работы и стек.",
+    kind: "Список",
+  },
+  {
+    id: "gallery",
+    title: "Фотогалерея",
+    description: "Медиа, подписи и типы материалов.",
+    kind: "Список",
+  },
+  {
+    id: "offices",
+    title: "Офисы",
+    description: "Города, описания и изображения офисов.",
+    kind: "Список",
+  },
+  {
+    id: "benefits",
+    title: "Плюшки",
+    description: "Заголовок и карточки преимуществ.",
+    kind: "Список",
+  },
+  {
+    id: "contact",
+    title: "Контакты",
+    description: "Текст финального HR-блока и подпись кнопки.",
+    kind: "Простой блок",
+  },
+];
+
+const adminBlockMap = new Map(adminBlocks.map((block) => [block.id, block]));
 
 const normalizeHero = (hero: HeroData): HeroFormData => ({
   title: hero.title ?? "",
@@ -138,6 +237,54 @@ const normalizeContact = (contact: ContactData): ContactFormData => ({
 
 const getErrorMessage = (error: unknown) =>
   error instanceof Error ? error.message : "Unknown error";
+
+const getBlockIdFromPath = (): AdminBlockId | null => {
+  const [, maybeAdmin, blockId] = window.location.pathname.split("/");
+
+  if (maybeAdmin !== "admin" || !blockId) {
+    return null;
+  }
+
+  return adminBlockMap.has(blockId as AdminBlockId)
+    ? (blockId as AdminBlockId)
+    : null;
+};
+
+function useAdminPath() {
+  const [activeBlockId, setActiveBlockId] = useState<AdminBlockId | null>(
+    getBlockIdFromPath,
+  );
+
+  useEffect(() => {
+    const handlePopState = () => {
+      setActiveBlockId(getBlockIdFromPath());
+    };
+
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, []);
+
+  const navigateToBlock = (blockId: AdminBlockId) => {
+    window.history.pushState(null, "", `/admin/${blockId}`);
+    setActiveBlockId(blockId);
+    window.scrollTo({ top: 0 });
+  };
+
+  const navigateToDashboard = () => {
+    window.history.pushState(null, "", "/admin");
+    setActiveBlockId(null);
+    window.scrollTo({ top: 0 });
+  };
+
+  return {
+    activeBlockId,
+    navigateToBlock,
+    navigateToDashboard,
+  };
+}
 
 function useAdminResource<ApiData, FormData>(
   loadResource: () => Promise<ApiData>,
@@ -209,8 +356,21 @@ function AdminSection<FormData>({
   successText,
   children,
 }: AdminSectionProps<FormData>) {
+  const statusRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (resource.isSaved || resource.saveError) {
+      statusRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+  }, [resource.isSaved, resource.saveError]);
+
   return (
     <section style={styles.adminSection}>
+      <div ref={statusRef} style={styles.statusAnchor} />
+
       {resource.isLoading && <p style={styles.message}>{loadingText}</p>}
 
       {resource.loadError && (
@@ -223,7 +383,10 @@ function AdminSection<FormData>({
       {resource.data && !resource.isLoading && !resource.loadError && (
         <>
           {resource.isSaved && (
-            <p style={{ ...styles.message, ...styles.success }}>
+            <p
+              className="admin-status-flash"
+              style={{ ...styles.message, ...styles.success }}
+            >
               {successText}
             </p>
           )}
@@ -235,242 +398,355 @@ function AdminSection<FormData>({
             </p>
           )}
 
-          {children(resource.data)}
+          {children(resource.data, resource)}
         </>
       )}
     </section>
   );
 }
 
-export default function AdminPage() {
-  const heroResource = useAdminResource(
-    getAdminHero,
-    updateAdminHero,
-    normalizeHero,
+function AdminResourceEditor<ApiData, FormData>({
+  loadResource,
+  updateResource,
+  normalize,
+  ...sectionProps
+}: AdminResourceEditorProps<ApiData, FormData>) {
+  const resource = useAdminResource(loadResource, updateResource, normalize);
+
+  return <AdminSection {...sectionProps} resource={resource} />;
+}
+
+function AdminDashboard({
+  onSelectBlock,
+}: {
+  onSelectBlock: (blockId: AdminBlockId) => void;
+}) {
+  return (
+    <>
+      <section style={styles.heroPanel}>
+        <div style={styles.brandLine}>
+          <p style={styles.eyebrow}>TravelLine Admin</p>
+        </div>
+        <h1 style={styles.title}>Выберите блок для редактирования</h1>
+        <p style={{ ...styles.description, display: "none" }}>
+          Каждый раздел открывается на отдельной странице, чтобы не листать всю
+          админку сверху вниз.
+        </p>
+      </section>
+
+      <section style={styles.blocksGrid}>
+        {adminBlocks.map((block, index) => (
+          <button
+            key={block.id}
+            type="button"
+            style={styles.blockCard}
+            onClick={() => onSelectBlock(block.id)}
+          >
+            <span style={styles.blockNumber}>{String(index + 1).padStart(2, "0")}</span>
+            <span style={styles.blockContent}>
+              <span style={styles.blockTitle}>{block.title}</span>
+              <span
+                className="admin-block-description"
+                style={styles.blockDescription}
+              >
+                {block.description}
+              </span>
+            </span>
+          </button>
+        ))}
+      </section>
+    </>
   );
-  const teamResource = useAdminResource(
-    getAdminTeam,
-    updateAdminTeam,
-    normalizeTeam,
-  );
-  const platformTimelineResource = useAdminResource(
-    getAdminPlatformTimeline,
-    updateAdminPlatformTimeline,
-    normalizePlatformTimeline,
-  );
-  const clientLogosResource = useAdminResource(
-    getAdminClientLogos,
-    updateAdminClientLogos,
-    normalizeClientLogos,
-  );
-  const directionsResource = useAdminResource(
-    getAdminDirections,
-    updateAdminDirections,
-    normalizeDirections,
-  );
-  const vacanciesResource = useAdminResource(
-    getAdminVacancies,
-    updateAdminVacancies,
-    normalizeVacancies,
-  );
-  const galleryResource = useAdminResource(
-    getAdminGallery,
-    updateAdminGallery,
-    normalizeGallery,
-  );
-  const officesResource = useAdminResource(
-    getAdminOffices,
-    updateAdminOffices,
-    normalizeOffices,
-  );
-  const benefitsResource = useAdminResource(
-    getAdminBenefits,
-    updateAdminBenefits,
-    normalizeBenefits,
-  );
-  const contactResource = useAdminResource(
-    getAdminContact,
-    updateAdminContact,
-    normalizeContact,
-  );
+}
+
+function AdminBlockPage({
+  blockId,
+  onBack,
+}: {
+  blockId: AdminBlockId;
+  onBack: () => void;
+}) {
+  const block = adminBlockMap.get(blockId);
+
+  if (!block) {
+    return (
+      <section style={styles.heroPanel}>
+        <h1 style={styles.title}>Блок не найден</h1>
+        <button type="button" style={styles.secondaryButton} onClick={onBack}>
+          Назад
+        </button>
+      </section>
+    );
+  }
 
   return (
-    <main style={styles.page}>
-      <section style={styles.panel}>
-        <p style={styles.eyebrow}>TravelLine</p>
-        <h1 style={styles.title}>Admin Panel</h1>
-        <p style={styles.description}>Управление содержимым сайта</p>
+    <>
+      <section style={styles.editorHeader}>
+        <button type="button" style={styles.backButton} onClick={onBack}>
+          Назад
+        </button>
+        <div>
+          <p style={styles.eyebrow}>Редактирование блока</p>
+          <h1 style={styles.title}>{block.title}</h1>
+          <p style={styles.description}>{block.description}</p>
+        </div>
+      </section>
 
-        <AdminSection
-          resource={heroResource}
-          loadingText="Загрузка..."
-          loadErrorPrefix="Ошибка загрузки: "
-          saveErrorPrefix="Ошибка сохранения: "
-          successText="Сохранено"
+      <AdminBlockSwitch blockId={blockId} />
+    </>
+  );
+}
+
+function AdminBlockSwitch({ blockId }: { blockId: AdminBlockId }) {
+  switch (blockId) {
+    case "hero":
+      return (
+        <AdminResourceEditor
+          loadResource={getAdminHero}
+          updateResource={updateAdminHero}
+          normalize={normalizeHero}
+          loadingText="Загрузка Hero..."
+          loadErrorPrefix="Ошибка загрузки Hero: "
+          saveErrorPrefix="Ошибка сохранения Hero: "
+          successText="Hero сохранён"
         >
-          {(hero) => (
+          {(hero, resource) => (
             <HeroForm
               key={JSON.stringify(hero)}
               hero={hero}
-              isSaving={heroResource.isSaving}
-              onSubmit={heroResource.save}
+              isSaving={resource.isSaving}
+              onSubmit={resource.save}
             />
           )}
-        </AdminSection>
+        </AdminResourceEditor>
+      );
 
-        <AdminSection
-          resource={teamResource}
+    case "team":
+      return (
+        <AdminResourceEditor
+          loadResource={getAdminTeam}
+          updateResource={updateAdminTeam}
+          normalize={normalizeTeam}
           loadingText="Загрузка команды..."
           loadErrorPrefix="Ошибка загрузки команды: "
           saveErrorPrefix="Ошибка сохранения команды: "
           successText="Команда сохранена"
         >
-          {(team) => (
+          {(team, resource) => (
             <TeamForm
               key={JSON.stringify(team)}
               team={team}
-              isSaving={teamResource.isSaving}
-              onSubmit={teamResource.save}
+              isSaving={resource.isSaving}
+              onSubmit={resource.save}
             />
           )}
-        </AdminSection>
+        </AdminResourceEditor>
+      );
 
-        <AdminSection
-          resource={platformTimelineResource}
+    case "platform-timeline":
+      return (
+        <AdminResourceEditor
+          loadResource={getAdminPlatformTimeline}
+          updateResource={updateAdminPlatformTimeline}
+          normalize={normalizePlatformTimeline}
           loadingText="Загрузка таймлайна..."
           loadErrorPrefix="Ошибка загрузки таймлайна: "
           saveErrorPrefix="Ошибка сохранения таймлайна: "
           successText="Таймлайн сохранён"
         >
-          {(platformTimeline) => (
+          {(platformTimeline, resource) => (
             <PlatformTimelineForm
               key={JSON.stringify(platformTimeline)}
               platformTimeline={platformTimeline}
-              isSaving={platformTimelineResource.isSaving}
-              onSubmit={platformTimelineResource.save}
+              isSaving={resource.isSaving}
+              onSubmit={resource.save}
             />
           )}
-        </AdminSection>
+        </AdminResourceEditor>
+      );
 
-        <AdminSection
-          resource={clientLogosResource}
+    case "clients":
+      return (
+        <AdminResourceEditor
+          loadResource={getAdminClientLogos}
+          updateResource={updateAdminClientLogos}
+          normalize={normalizeClientLogos}
           loadingText="Загрузка логотипов..."
           loadErrorPrefix="Ошибка загрузки логотипов: "
           saveErrorPrefix="Ошибка сохранения логотипов: "
           successText="Логотипы сохранены"
         >
-          {(clientLogos) => (
+          {(clientLogos, resource) => (
             <ClientLogosForm
               key={JSON.stringify(clientLogos)}
               clients={clientLogos}
-              isSaving={clientLogosResource.isSaving}
-              onSubmit={clientLogosResource.save}
+              isSaving={resource.isSaving}
+              onSubmit={resource.save}
             />
           )}
-        </AdminSection>
+        </AdminResourceEditor>
+      );
 
-        <AdminSection
-          resource={directionsResource}
+    case "directions":
+      return (
+        <AdminResourceEditor
+          loadResource={getAdminDirections}
+          updateResource={updateAdminDirections}
+          normalize={normalizeDirections}
           loadingText="Загрузка направлений..."
           loadErrorPrefix="Ошибка загрузки направлений: "
           saveErrorPrefix="Ошибка сохранения направлений: "
           successText="Направления сохранены"
         >
-          {(directions) => (
+          {(directions, resource) => (
             <DirectionsForm
               key={JSON.stringify(directions)}
               directions={directions}
-              isSaving={directionsResource.isSaving}
-              onSubmit={directionsResource.save}
+              isSaving={resource.isSaving}
+              onSubmit={resource.save}
             />
           )}
-        </AdminSection>
+        </AdminResourceEditor>
+      );
 
-        <AdminSection
-          resource={vacanciesResource}
+    case "vacancies":
+      return (
+        <AdminResourceEditor
+          loadResource={getAdminVacancies}
+          updateResource={updateAdminVacancies}
+          normalize={normalizeVacancies}
           loadingText="Загрузка вакансий..."
           loadErrorPrefix="Ошибка загрузки вакансий: "
           saveErrorPrefix="Ошибка сохранения вакансий: "
           successText="Вакансии сохранены"
         >
-          {(vacancies) => (
+          {(vacancies, resource) => (
             <VacanciesForm
               key={JSON.stringify(vacancies)}
               vacancies={vacancies}
-              isSaving={vacanciesResource.isSaving}
-              onSubmit={vacanciesResource.save}
+              isSaving={resource.isSaving}
+              onSubmit={resource.save}
             />
           )}
-        </AdminSection>
+        </AdminResourceEditor>
+      );
 
-        <AdminSection
-          resource={galleryResource}
+    case "gallery":
+      return (
+        <AdminResourceEditor
+          loadResource={getAdminGallery}
+          updateResource={updateAdminGallery}
+          normalize={normalizeGallery}
           loadingText="Загрузка галереи..."
           loadErrorPrefix="Ошибка загрузки галереи: "
           saveErrorPrefix="Ошибка сохранения галереи: "
           successText="Галерея сохранена"
         >
-          {(gallery) => (
+          {(gallery, resource) => (
             <GalleryForm
               key={JSON.stringify(gallery)}
               gallery={gallery}
-              isSaving={galleryResource.isSaving}
-              onSubmit={galleryResource.save}
+              isSaving={resource.isSaving}
+              onSubmit={resource.save}
             />
           )}
-        </AdminSection>
+        </AdminResourceEditor>
+      );
 
-        <AdminSection
-          resource={officesResource}
+    case "offices":
+      return (
+        <AdminResourceEditor
+          loadResource={getAdminOffices}
+          updateResource={updateAdminOffices}
+          normalize={normalizeOffices}
           loadingText="Загрузка офисов..."
           loadErrorPrefix="Ошибка загрузки офисов: "
           saveErrorPrefix="Ошибка сохранения офисов: "
           successText="Офисы сохранены"
         >
-          {(offices) => (
+          {(offices, resource) => (
             <OfficesForm
               key={JSON.stringify(offices)}
               offices={offices}
-              isSaving={officesResource.isSaving}
-              onSubmit={officesResource.save}
+              isSaving={resource.isSaving}
+              onSubmit={resource.save}
             />
           )}
-        </AdminSection>
+        </AdminResourceEditor>
+      );
 
-        <AdminSection
-          resource={benefitsResource}
-          loadingText="Загрузка бонусов..."
-          loadErrorPrefix="Ошибка загрузки бонусов: "
-          saveErrorPrefix="Ошибка сохранения бонусов: "
-          successText="Бонусы сохранены"
+    case "benefits":
+      return (
+        <AdminResourceEditor
+          loadResource={getAdminBenefits}
+          updateResource={updateAdminBenefits}
+          normalize={normalizeBenefits}
+          loadingText="Загрузка плюшек..."
+          loadErrorPrefix="Ошибка загрузки плюшек: "
+          saveErrorPrefix="Ошибка сохранения плюшек: "
+          successText="Плюшки сохранены"
         >
-          {(benefits) => (
+          {(benefits, resource) => (
             <BenefitsForm
               key={JSON.stringify(benefits)}
               benefits={benefits}
-              isSaving={benefitsResource.isSaving}
-              onSubmit={benefitsResource.save}
+              isSaving={resource.isSaving}
+              onSubmit={resource.save}
             />
           )}
-        </AdminSection>
+        </AdminResourceEditor>
+      );
 
-        <AdminSection
-          resource={contactResource}
+    case "contact":
+      return (
+        <AdminResourceEditor
+          loadResource={getAdminContact}
+          updateResource={updateAdminContact}
+          normalize={normalizeContact}
           loadingText="Загрузка контактов..."
           loadErrorPrefix="Ошибка загрузки контактов: "
           saveErrorPrefix="Ошибка сохранения контактов: "
           successText="Контакты сохранены"
         >
-          {(contact) => (
+          {(contact, resource) => (
             <ContactForm
               key={JSON.stringify(contact)}
               contact={contact}
-              isSaving={contactResource.isSaving}
-              onSubmit={contactResource.save}
+              isSaving={resource.isSaving}
+              onSubmit={resource.save}
             />
           )}
-        </AdminSection>
-      </section>
+        </AdminResourceEditor>
+      );
+  }
+}
+
+export default function AdminPage() {
+  const { activeBlockId, navigateToBlock, navigateToDashboard } =
+    useAdminPath();
+  const currentBlock = useMemo(
+    () => (activeBlockId ? adminBlockMap.get(activeBlockId) : null),
+    [activeBlockId],
+  );
+
+  useEffect(() => {
+    document.title = currentBlock
+      ? `${currentBlock.title} - TravelLine Admin`
+      : "TravelLine Admin";
+  }, [currentBlock]);
+
+  return (
+    <main className="admin-page" style={styles.page}>
+      <div style={styles.panel}>
+        {activeBlockId ? (
+          <AdminBlockPage
+            blockId={activeBlockId}
+            onBack={navigateToDashboard}
+          />
+        ) : (
+          <AdminDashboard onSelectBlock={navigateToBlock} />
+        )}
+      </div>
     </main>
   );
 }
@@ -478,50 +754,168 @@ export default function AdminPage() {
 const styles: Record<string, CSSProperties> = {
   page: {
     minHeight: "100vh",
-    background: "#0f1115",
-    color: "white",
-    padding: "48px",
-    fontFamily: "Arial, sans-serif",
+    background: "linear-gradient(180deg, #ffffff 0%, #eaf4ff 100%)",
+    color: page.lightText,
+    padding: "56px 0 72px",
+    fontFamily:
+      "Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
   },
 
   panel: {
-    maxWidth: "920px",
-    margin: "0 auto",
+    ...container,
+    display: "grid",
+    gap: "28px",
+  },
+
+  heroPanel: {
+    ...lightCard,
+    padding: "36px",
+  },
+
+  brandLine: {
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+    marginBottom: "12px",
+  },
+
+  brandLogo: {
+    width: "26px",
+    height: "26px",
+    objectFit: "contain",
+  },
+
+  editorHeader: {
+    ...lightCard,
+    display: "grid",
+    gridTemplateColumns: "auto 1fr",
+    gap: "22px",
+    alignItems: "start",
+    padding: "28px",
   },
 
   eyebrow: {
     margin: "0 0 12px",
-    color: "#c9cdd6",
-    fontSize: "14px",
+    color: page.accent,
+    fontSize: "12px",
+    fontWeight: 800,
+    textTransform: "uppercase",
     letterSpacing: 0,
   },
 
   title: {
     margin: "0 0 12px",
-    fontSize: "40px",
-    fontWeight: 700,
+    color: page.lightText,
+    fontSize: "clamp(32px, 5vw, 52px)",
+    lineHeight: 1.08,
+    fontWeight: 900,
   },
 
   description: {
-    margin: "0 0 32px",
-    color: "#c9cdd6",
+    margin: "0",
+    color: page.lightSoftText,
     fontSize: "18px",
+    lineHeight: 1.7,
+  },
+
+  blocksGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 280px), 1fr))",
+    gap: "18px",
+  },
+
+  blockCard: {
+    ...lightCard,
+    display: "grid",
+    gridTemplateColumns: "auto 1fr",
+    gap: "18px",
+    minHeight: "180px",
+    padding: "24px",
+    border: `1px solid ${page.lightBorder}`,
+    color: page.lightText,
+    textAlign: "left",
+    cursor: "pointer",
+    transition:
+      "transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease",
+  },
+
+  blockNumber: {
+    width: "44px",
+    height: "44px",
+    display: "grid",
+    placeItems: "center",
+    borderRadius: "16px",
+    background: page.softBlue,
+    color: page.accent,
+    fontSize: "14px",
+    fontWeight: 900,
+  },
+
+  blockContent: {
+    display: "grid",
+    gap: "10px",
+  },
+
+  blockTitle: {
+    fontSize: "22px",
+    fontWeight: 900,
+    lineHeight: 1.15,
+  },
+
+  blockDescription: {
+    color: page.lightSoftText,
+    fontSize: "15px",
+    lineHeight: 1.55,
+  },
+
+  blockMeta: {
+    gridColumn: "2",
+    alignSelf: "end",
+    justifySelf: "start",
+    padding: "7px 10px",
+    borderRadius: "999px",
+    background: page.light,
+    color: page.accent,
+    fontSize: "12px",
+    fontWeight: 800,
+  },
+
+  backButton: {
+    ...secondaryButton,
+    minHeight: "42px",
+    padding: "10px 16px",
+  },
+
+  secondaryButton: {
+    ...secondaryButton,
   },
 
   message: {
     margin: "0 0 16px",
-    color: "#c9cdd6",
+    padding: "14px 16px",
+    border: `1px solid ${page.lightBorder}`,
+    borderRadius: "18px",
+    background: "rgba(255, 255, 255, 0.74)",
+    color: page.lightSoftText,
   },
 
   adminSection: {
-    marginTop: "40px",
+    display: "grid",
+    gap: "16px",
+  },
+
+  statusAnchor: {
+    height: 0,
+    scrollMarginTop: "170px",
   },
 
   success: {
-    color: "#8fd694",
+    borderColor: page.strongBorder,
+    color: page.accent,
   },
 
   error: {
-    color: "#ff9b9b",
+    borderColor: "rgba(220, 38, 38, 0.22)",
+    color: "#b42318",
   },
 };

@@ -1,73 +1,119 @@
-import type { ContentData } from "../api/contentApi";
 import type { CSSProperties } from "react";
+import type { ContentData } from "../api/contentApi";
+import { container, page, primaryButton } from "./publicStyles";
 
 type HeaderProps = {
   header: ContentData["header"];
 };
 
+const hiddenNavIds = new Set(["about"]);
+
+const linkLabels: Record<string, string> = {
+  directions: "Направления",
+  vacancies: "Вакансии",
+  benefits: "Плюшки",
+};
+
 export default function Header({ header }: HeaderProps) {
-  const links =
+  const rawLinks = (
     header?.links ??
     header?.nav?.map((label) => ({
       label,
       id: label.toLowerCase(),
     })) ??
-    [];
+    []
+  ).filter((link) => !hiddenNavIds.has(link.id));
+
+  const links = rawLinks.map((link) => ({
+    ...link,
+    label: linkLabels[link.id] ?? link.label,
+  }));
 
   return (
-    <header style={styles.header}>
-      <div style={styles.logo}>
-        {header?.logo}
-      </div>
-
-      <nav style={styles.nav}>
-        {links.map((link, i) => (
-          <a key={i} href={"#" + link.id} style={styles.link}>
-            {link.label}
+    <>
+      <header style={styles.header}>
+        <div style={styles.inner}>
+          <a href="#" style={styles.logo}>
+            {header?.logo ?? "TravelLine"}
           </a>
-        ))}
-      </nav>
 
-      <button style={styles.button}>
-        {header?.buttonText ?? "Apply"}
-      </button>
-    </header>
+          <nav style={styles.nav} aria-label="Основная навигация">
+            {links.map((link, i) => (
+              <a key={i} href={"#" + link.id} style={styles.link}>
+                {link.label}
+              </a>
+            ))}
+          </nav>
+
+          <a href="#contact" style={styles.button}>
+            Свяжитесь с нами!
+          </a>
+        </div>
+      </header>
+      <div aria-hidden="true" style={styles.spacer} />
+    </>
   );
 }
 
 const styles: Record<string, CSSProperties> = {
   header: {
-    position: "sticky",
+    position: "fixed",
     top: 0,
+    left: 0,
+    right: 0,
+    width: "100%",
+    minHeight: "76px",
     display: "flex",
+    alignItems: "center",
+    background: "rgba(255, 255, 255, 0.9)",
+    color: page.lightText,
+    borderBottom: `1px solid ${page.lightBorder}`,
+    backdropFilter: "blur(18px)",
+    zIndex: 3000,
+  },
+
+  spacer: {
+    height: "76px",
+    width: "100%",
+    flexShrink: 0,
+  },
+
+  inner: {
+    ...container,
+    display: "flex",
+    alignItems: "center",
     justifyContent: "space-between",
-    padding: "15px 40px",
-    background: "#0b0d12",
-    color: "white",
-    borderBottom: "1px solid #222",
-    zIndex: 100
+    gap: "24px",
+    minHeight: "76px",
   },
 
   logo: {
-    fontWeight: "bold"
+    color: page.lightText,
+    fontSize: "18px",
+    fontWeight: 800,
+    textDecoration: "none",
+    whiteSpace: "nowrap",
   },
 
   nav: {
     display: "flex",
-    gap: "20px"
+    justifyContent: "center",
+    gap: "24px",
+    flex: "1 1 auto",
+    flexWrap: "wrap",
   },
 
   link: {
-    color: "white",
-    opacity: 0.7,
-    textDecoration: "none"
+    color: page.lightSoftText,
+    fontSize: "15px",
+    fontWeight: 600,
+    textDecoration: "none",
   },
 
   button: {
-    padding: "6px 12px",
-    border: "1px solid white",
-    background: "transparent",
-    color: "white",
-    cursor: "pointer"
-  }
+    ...primaryButton,
+    minHeight: "40px",
+    padding: "10px 18px",
+    whiteSpace: "nowrap",
+  },
 };

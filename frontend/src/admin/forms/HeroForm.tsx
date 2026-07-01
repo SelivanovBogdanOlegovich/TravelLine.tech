@@ -1,6 +1,8 @@
 import { useState } from "react";
 import type { CSSProperties, FormEvent } from "react";
 import type { HeroFormData } from "../types/heroForm";
+import { formStyles as sharedStyles } from "./formStyles";
+import { animateAdminRemoval, scrollToFormSubmit } from "./scrollHelpers";
 
 type HeroFormProps = {
   hero: HeroFormData;
@@ -45,6 +47,7 @@ export default function HeroForm({
       ...current,
       stats: [...current.stats, { label: "", value: "" }],
     }));
+    scrollToFormSubmit();
   };
 
   const removeStat = (index: number) => {
@@ -100,7 +103,7 @@ export default function HeroForm({
 
         <div style={styles.statsList}>
           {formData.stats.map((stat, index) => (
-            <div key={index} style={styles.statCard}>
+            <div key={index} data-admin-item style={styles.statCard}>
               <label style={styles.field}>
                 <span style={styles.label}>
                   {"\u0422\u0435\u043a\u0441\u0442"}
@@ -129,8 +132,11 @@ export default function HeroForm({
 
               <button
                 type="button"
+                className="admin-remove-button"
                 style={styles.removeButton}
-                onClick={() => removeStat(index)}
+                onClick={(event) =>
+                  animateAdminRemoval(event, () => removeStat(index))
+                }
               >
                 {"\u0423\u0434\u0430\u043b\u0438\u0442\u044c"}
               </button>
@@ -149,109 +155,22 @@ export default function HeroForm({
 }
 
 const styles: Record<string, CSSProperties> = {
-  form: {
-    display: "grid",
-    gap: "24px",
-    padding: "24px",
-    border: "1px solid #333",
-    borderRadius: "8px",
-    background: "#0b0d12",
-  },
-
-  heading: {
-    margin: 0,
-    fontSize: "26px",
-  },
-
-  subheading: {
-    margin: 0,
-    fontSize: "20px",
-  },
-
-  field: {
-    display: "grid",
-    gap: "8px",
-  },
-
-  label: {
-    color: "#c9cdd6",
-    fontSize: "14px",
-  },
-
-  input: {
-    width: "100%",
-    boxSizing: "border-box",
-    padding: "12px",
-    border: "1px solid #333",
-    borderRadius: "6px",
-    background: "#11141b",
-    color: "white",
-    font: "inherit",
-  },
+  ...sharedStyles,
 
   textarea: {
+    ...sharedStyles.textarea,
     minHeight: "96px",
-    resize: "vertical",
   },
 
-  statsSection: {
-    display: "grid",
-    gap: "16px",
-  },
-
-  statsHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    gap: "16px",
-    alignItems: "center",
-  },
-
-  statsList: {
-    display: "grid",
-    gap: "16px",
-  },
+  statsSection: sharedStyles.itemsSection,
+  statsHeader: sharedStyles.sectionHeader,
+  statsList: sharedStyles.itemsList,
 
   statCard: {
+    ...sharedStyles.itemCard,
     display: "grid",
-    gridTemplateColumns: "1fr 1fr auto",
+    gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 220px), 1fr)) auto",
     gap: "16px",
     alignItems: "end",
-    padding: "16px",
-    border: "1px solid #2a2a2a",
-    borderRadius: "8px",
-  },
-
-  emptyText: {
-    margin: 0,
-    color: "#c9cdd6",
-  },
-
-  secondaryButton: {
-    padding: "10px 14px",
-    border: "1px solid #555",
-    borderRadius: "6px",
-    background: "transparent",
-    color: "white",
-    cursor: "pointer",
-  },
-
-  removeButton: {
-    padding: "12px",
-    border: "1px solid #555",
-    borderRadius: "6px",
-    background: "transparent",
-    color: "white",
-    cursor: "pointer",
-  },
-
-  submitButton: {
-    justifySelf: "start",
-    padding: "12px 22px",
-    border: "1px solid white",
-    borderRadius: "6px",
-    background: "white",
-    color: "#0b0d12",
-    cursor: "pointer",
-    fontWeight: 700,
   },
 };

@@ -7,23 +7,19 @@ type LayoutProps = {
 export default function Layout({ children }: LayoutProps) {
   return (
     <div style={styles.wrapper}>
-      <div style={styles.container}>
-        {children}
-      </div>
+      {children}
     </div>
   );
 }
 
 const styles: Record<string, CSSProperties> = {
   wrapper: {
-    background: "#0b0d12",
-    color: "white",
+    width: "100%",
+    overflowX: "hidden",
+    background: "#f6f7fb",
+    color: "#5278d8",
     minHeight: "100vh",
-    fontFamily: "Arial, sans-serif"
-  },
-
-  container: {
-    maxWidth: "1200px",
-    margin: "0 auto"
+    fontFamily:
+      "Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
   }
 };

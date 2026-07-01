@@ -1,5 +1,6 @@
-import type { ContentData, FooterLink } from "../api/contentApi";
 import type { CSSProperties } from "react";
+import type { ContentData, FooterLink } from "../api/contentApi";
+import { container, page } from "./publicStyles";
 
 type FooterProps = {
   footer: ContentData["footer"];
@@ -13,14 +14,16 @@ export default function Footer({ footer }: FooterProps) {
 
   return (
     <footer style={styles.footer}>
-      <p>{footer?.text ?? footer?.copyright}</p>
+      <div style={styles.inner}>
+        <p style={styles.copy}>{footer?.text ?? footer?.copyright}</p>
 
-      <div style={styles.links}>
-        {links.map((l, i) => (
-          <a key={i} href={l.url} style={styles.link}>
-            {l.label}
-          </a>
-        ))}
+        <div style={styles.links}>
+          {links.map((link, i) => (
+            <a key={i} href={link.url} style={styles.link}>
+              {link.label}
+            </a>
+          ))}
+        </div>
       </div>
     </footer>
   );
@@ -28,23 +31,36 @@ export default function Footer({ footer }: FooterProps) {
 
 const styles: Record<string, CSSProperties> = {
   footer: {
-    padding: "40px",
-    background: "#0b0d12",
-    color: "white",
+    width: "100%",
+    padding: "34px 0",
+    background: "#0b1f3a",
+    color: "#f4f7fb",
+    borderTop: `1px solid ${page.darkBorder}`,
+  },
+
+  inner: {
+    ...container,
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    borderTop: "1px solid #222"
+    gap: "20px",
+    flexWrap: "wrap",
+  },
+
+  copy: {
+    color: "#f4f7fb",
+    fontWeight: 700,
   },
 
   links: {
     display: "flex",
-    gap: "15px"
+    gap: "18px",
+    flexWrap: "wrap",
   },
 
   link: {
-    color: "white",
-    opacity: 0.7,
-    textDecoration: "none"
-  }
+    color: "#c9d0dc",
+    textDecoration: "none",
+    fontWeight: 600,
+  },
 };

@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import type { ContentData, OfficeItem } from "../api/contentApi";
+import { container, lightCard, lightSubtitle, lightTitle, page, sectionHeader } from "./publicStyles";
 
 type OfficesProps = {
   offices: ContentData["offices"];
@@ -16,11 +17,8 @@ export default function Offices({ offices }: OfficesProps) {
     <section style={styles.section}>
       <div style={styles.container}>
         <div style={styles.header}>
-          <p style={styles.eyebrow}>Offices</p>
           <h2 style={styles.title}>{offices.title}</h2>
-          {offices.subtitle && (
-            <p style={styles.subtitle}>{offices.subtitle}</p>
-          )}
+          {offices.subtitle && <p style={styles.subtitle}>{offices.subtitle}</p>}
         </div>
 
         <div style={styles.grid}>
@@ -46,53 +44,39 @@ export default function Offices({ offices }: OfficesProps) {
 
 const styles: Record<string, CSSProperties> = {
   section: {
-    padding: "92px 40px",
-    background: "#0f1115",
-    color: "white",
+    width: "100%",
+    padding: "104px 0",
+    background: page.lightSoft,
+    color: page.lightText,
   },
 
-  container: {
-    maxWidth: "1120px",
-    margin: "0 auto",
-  },
+  container: container,
 
-  header: {
-    maxWidth: "760px",
-    marginBottom: "42px",
-  },
+  header: sectionHeader,
 
   eyebrow: {
-    margin: "0 0 12px",
-    color: "#9ba3b4",
-    fontSize: "14px",
+    marginBottom: "14px",
+    color: page.blue,
+    fontSize: "12px",
+    fontWeight: 800,
     textTransform: "uppercase",
     letterSpacing: 0,
   },
 
-  title: {
-    margin: "0 0 14px",
-    fontSize: "38px",
-    lineHeight: 1.15,
-  },
+  title: lightTitle,
 
-  subtitle: {
-    margin: 0,
-    color: "#c9cdd6",
-    fontSize: "17px",
-    lineHeight: 1.6,
-  },
+  subtitle: lightSubtitle,
 
   grid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-    gap: "22px",
+    gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 300px), 1fr))",
+    gap: "24px",
+    marginTop: "52px",
   },
 
   card: {
+    ...lightCard,
     overflow: "hidden",
-    border: "1px solid rgba(255, 255, 255, 0.1)",
-    borderRadius: "18px",
-    background: "#151922",
   },
 
   photo: {
@@ -100,21 +84,24 @@ const styles: Record<string, CSSProperties> = {
     width: "100%",
     aspectRatio: "16 / 10",
     objectFit: "cover",
+    background: page.light,
   },
 
   cardBody: {
-    padding: "22px",
+    padding: "26px",
   },
 
   city: {
-    margin: "0 0 10px",
-    fontSize: "22px",
+    color: page.lightText,
+    fontSize: "24px",
+    lineHeight: 1.2,
+    fontWeight: 800,
   },
 
   description: {
-    margin: 0,
-    color: "#c9cdd6",
-    fontSize: "15px",
-    lineHeight: 1.6,
+    marginTop: "12px",
+    color: page.lightSoftText,
+    fontSize: "16px",
+    lineHeight: 1.65,
   },
 };

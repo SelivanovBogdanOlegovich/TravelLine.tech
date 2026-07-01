@@ -8,16 +8,11 @@ import Header from "../sections/Header";
 import Hero from "../sections/Hero";
 import Team from "../sections/Team";
 import PlatformTimeline from "../sections/PlatformTimeline";
-import Clients from "../sections/Clients";
 import Directions from "../sections/Directions";
 import Vacancies from "../sections/Vacancies";
 import Gallery from "../sections/Gallery";
 import Offices from "../sections/Offices";
-import About from "../sections/About";
 import Benefits from "../sections/Benefits";
-import Testimonials from "../sections/Testimonials";
-import CTA from "../sections/CTA";
-import Stats from "../sections/Stats";
 import Contact from "../sections/Contact";
 import Footer from "../sections/Footer";
 
@@ -78,17 +73,15 @@ export default function HomePage() {
       <Header header={content.header} />
       <Hero hero={content.hero} />
       <Team team={content.team} />
-      <PlatformTimeline platformTimeline={content.platformTimeline} />
-      <Clients clients={content.clients} />
+      <PlatformTimeline
+        platformTimeline={content.platformTimeline}
+        clients={content.clients}
+      />
       <Directions directions={content.directions ?? []} />
       <Vacancies vacancies={content.vacancies ?? []} />
       <Gallery gallery={content.gallery} />
       <Offices offices={content.offices} />
       <Benefits benefits={content.benefits} />
-      <About about={content.about} />
-      <Testimonials testimonials={content.testimonials} />
-      <CTA cta={content.cta} />
-      <Stats stats={content.stats} statsBlock={content.statsBlock} />
       <Contact contact={content.contact} />
       <Footer footer={content.footer} />
     </Layout>

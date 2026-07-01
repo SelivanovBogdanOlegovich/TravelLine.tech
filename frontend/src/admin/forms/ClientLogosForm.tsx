@@ -2,6 +2,8 @@ import { useState } from "react";
 import type { CSSProperties, FormEvent } from "react";
 import type { ClientLogo } from "../../api/contentApi";
 import type { ClientLogosFormData } from "../types/clientLogosForm";
+import { formStyles as sharedStyles } from "./formStyles";
+import { animateAdminRemoval, scrollToFormSubmit } from "./scrollHelpers";
 
 type ClientLogosFormProps = {
   clients: ClientLogosFormData;
@@ -52,6 +54,7 @@ export default function ClientLogosForm({
       ...current,
       items: [...current.items, createClientLogo(current.items)],
     }));
+    scrollToFormSubmit();
   };
 
   const removeClient = (clientIndex: number) => {
@@ -111,7 +114,7 @@ export default function ClientLogosForm({
 
         <div style={styles.clientsList}>
           {formData.items.map((client, clientIndex) => (
-            <article key={client.id} style={styles.clientCard}>
+            <article key={client.id} data-admin-item style={styles.clientCard}>
               <div style={styles.clientHeader}>
                 <h4 style={styles.clientTitle}>
                   {client.name ||
@@ -119,8 +122,11 @@ export default function ClientLogosForm({
                 </h4>
                 <button
                   type="button"
+                  className="admin-remove-button"
                   style={styles.removeButton}
-                  onClick={() => removeClient(clientIndex)}
+                  onClick={(event) =>
+                    animateAdminRemoval(event, () => removeClient(clientIndex))
+                  }
                 >
                   {"\u0423\u0434\u0430\u043b\u0438\u0442\u044c"}
                 </button>
@@ -168,126 +174,23 @@ export default function ClientLogosForm({
 }
 
 const styles: Record<string, CSSProperties> = {
-  form: {
-    display: "grid",
-    gap: "24px",
-    padding: "24px",
-    border: "1px solid #333",
-    borderRadius: "8px",
-    background: "#0b0d12",
-  },
-
-  heading: {
-    margin: 0,
-    fontSize: "26px",
-  },
-
-  subheading: {
-    margin: 0,
-    fontSize: "20px",
-  },
-
-  field: {
-    display: "grid",
-    gap: "8px",
-  },
-
-  label: {
-    color: "#c9cdd6",
-    fontSize: "14px",
-  },
-
-  input: {
-    width: "100%",
-    boxSizing: "border-box",
-    padding: "12px",
-    border: "1px solid #333",
-    borderRadius: "6px",
-    background: "#11141b",
-    color: "white",
-    font: "inherit",
-  },
+  ...sharedStyles,
 
   textarea: {
+    ...sharedStyles.textarea,
     minHeight: "96px",
-    resize: "vertical",
   },
 
-  clientsSection: {
-    display: "grid",
-    gap: "16px",
-  },
-
-  sectionHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    gap: "16px",
-    alignItems: "center",
-  },
-
-  clientsList: {
-    display: "grid",
-    gap: "18px",
-  },
-
-  clientCard: {
-    display: "grid",
-    gap: "18px",
-    padding: "18px",
-    border: "1px solid #2a2a2a",
-    borderRadius: "8px",
-    background: "#0f1118",
-  },
-
-  clientHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    gap: "16px",
-    alignItems: "center",
-  },
-
-  clientTitle: {
-    margin: 0,
-    fontSize: "18px",
-  },
+  clientsSection: sharedStyles.itemsSection,
+  sectionHeader: sharedStyles.sectionHeader,
+  clientsList: sharedStyles.itemsList,
+  clientCard: sharedStyles.itemCard,
+  clientHeader: sharedStyles.itemHeader,
+  clientTitle: sharedStyles.itemTitle,
 
   clientGrid: {
     display: "grid",
-    gridTemplateColumns: "1fr 1fr",
+    gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 240px), 1fr))",
     gap: "16px",
-  },
-
-  emptyText: {
-    margin: 0,
-    color: "#c9cdd6",
-  },
-
-  secondaryButton: {
-    padding: "10px 14px",
-    border: "1px solid #555",
-    borderRadius: "6px",
-    background: "transparent",
-    color: "white",
-    cursor: "pointer",
-  },
-
-  removeButton: {
-    padding: "12px",
-    border: "1px solid #555",
-    borderRadius: "6px",
-    background: "transparent",
-    color: "white",
-    cursor: "pointer",
-  },
-
-  submitButton: {
-    justifySelf: "start",
-    padding: "12px 22px",
-    border: "1px solid white",
-    borderRadius: "6px",
-    background: "white",
-    color: "#0b0d12",
-    cursor: "pointer",
-    fontWeight: 700,
   },
 };

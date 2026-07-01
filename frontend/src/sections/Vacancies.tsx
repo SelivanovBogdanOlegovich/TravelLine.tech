@@ -1,5 +1,6 @@
-import type { Vacancy } from "../api/contentApi";
 import type { CSSProperties } from "react";
+import type { Vacancy } from "../api/contentApi";
+import { container, lightCard, lightTitle, page, primaryButton, sectionHeader } from "./publicStyles";
 
 type VacanciesProps = {
   vacancies: Vacancy[];
@@ -7,30 +8,36 @@ type VacanciesProps = {
 
 export default function Vacancies({ vacancies }: VacanciesProps) {
   return (
-    <section style={styles.section}>
+    <section id="vacancies" style={styles.section}>
       <div style={styles.container}>
-        <h2 style={styles.title}>Vacancies</h2>
+        <div style={styles.header}>
+          <h2 style={styles.title}>Ищем прямо сейчас</h2>
+        </div>
 
         <div style={styles.list}>
           {vacancies.map((job) => (
-            <div key={job.id} style={styles.card}>
+            <article key={job.id} style={styles.card}>
               <div>
                 <h3 style={styles.jobTitle}>{job.title}</h3>
 
-                <p style={styles.meta}>{job.location}</p>
-                <p style={styles.meta}>{job.type}</p>
-
-                <div style={styles.stack}>
-                  {(job.stack ?? []).map((s) => (
-                    <span key={s} style={styles.tag}>
-                      {s}
-                    </span>
-                  ))}
+                <div style={styles.metaRow}>
+                  <span style={styles.meta}>{job.location}</span>
+                  <span style={styles.meta}>{job.type}</span>
                 </div>
+
+                {(job.stack ?? []).length > 0 && (
+                  <div style={styles.stack}>
+                    {(job.stack ?? []).map((s) => (
+                      <span key={s} style={styles.tag}>
+                        {s}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
 
-              <button style={styles.button}>Apply</button>
-            </div>
+              <a href="#contact" style={styles.button}>Apply</a>
+            </article>
           ))}
         </div>
       </div>
@@ -40,80 +47,87 @@ export default function Vacancies({ vacancies }: VacanciesProps) {
 
 const styles: Record<string, CSSProperties> = {
   section: {
-    padding: "80px 40px",
-    background: "#0f1115",
-    color: "white",
-    display: "flex",
-    justifyContent: "center"
+    width: "100%",
+    padding: "100px 0",
+    background: page.lightSoft,
+    color: page.lightText,
   },
 
-  container: {
-    maxWidth: "1100px",
-    width: "100%"
+  container: container,
+
+  header: sectionHeader,
+
+  eyebrow: {
+    marginBottom: "14px",
+    color: page.accent,
+    fontSize: "12px",
+    fontWeight: 800,
+    textTransform: "uppercase",
+    letterSpacing: 0,
   },
 
-  title: {
-    fontSize: "32px",
-    margin: "0 0 40px",
-    textAlign: "center"
-  },
+  title: lightTitle,
 
   list: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-    gap: "24px"
+    gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 300px), 1fr))",
+    gap: "22px",
+    marginTop: "46px",
   },
 
   card: {
-    padding: "24px",
-    border: "1px solid #2a2a2a",
-    borderRadius: "12px",
-    background: "#0b0d12",
+    ...lightCard,
+    minHeight: "280px",
     display: "flex",
     flexDirection: "column",
     justifyContent: "space-between",
-    minHeight: "260px",
-    textAlign: "left"
+    padding: "30px",
+    textAlign: "left",
   },
 
   jobTitle: {
-    fontSize: "20px",
-    fontWeight: "600",
-    margin: "0 0 16px"
+    color: page.lightText,
+    fontSize: "24px",
+    lineHeight: 1.2,
+    fontWeight: 800,
+  },
+
+  metaRow: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "10px",
+    marginTop: "18px",
   },
 
   meta: {
-    margin: "0 0 6px",
-    color: "#c9cdd6",
-    fontSize: "15px",
-    lineHeight: "1.5"
+    padding: "8px 12px",
+    borderRadius: "999px",
+    color: page.lightSoftText,
+    background: page.lightSoft,
+    fontSize: "14px",
+    fontWeight: 700,
   },
 
   stack: {
     marginTop: "18px",
     display: "flex",
     gap: "8px",
-    flexWrap: "wrap"
+    flexWrap: "wrap",
   },
 
   tag: {
+    padding: "7px 11px",
+    border: `1px solid ${page.lightBorder}`,
+    borderRadius: "999px",
+    color: page.lightSoftText,
+    background: page.softBlue,
     fontSize: "12px",
-    border: "1px solid #444",
-    padding: "4px 8px",
-    borderRadius: "6px",
-    color: "#d7dbe5",
-    background: "#11141b"
+    fontWeight: 700,
   },
 
   button: {
-    marginTop: "24px",
-    padding: "10px 16px",
-    border: "1px solid white",
-    borderRadius: "6px",
-    background: "transparent",
-    color: "white",
-    cursor: "pointer",
+    ...primaryButton,
     alignSelf: "flex-start",
-    fontSize: "14px"
-  }
+    marginTop: "28px",
+  },
 };

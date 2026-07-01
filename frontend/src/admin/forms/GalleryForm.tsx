@@ -3,6 +3,7 @@ import type { FormEvent } from "react";
 import type { GalleryItem } from "../../api/contentApi";
 import type { GalleryFormData } from "../types/galleryForm";
 import { formStyles as styles } from "./formStyles";
+import { animateAdminRemoval, scrollToFormSubmit } from "./scrollHelpers";
 
 type GalleryFormProps = {
   gallery: GalleryFormData;
@@ -59,6 +60,7 @@ export default function GalleryForm({
       ...current,
       items: [...current.items, createGalleryItem(current.items)],
     }));
+    scrollToFormSubmit();
   };
 
   const removeItem = (itemIndex: number) => {
@@ -104,15 +106,18 @@ export default function GalleryForm({
 
         <div style={styles.itemsList}>
           {formData.items.map((item, itemIndex) => (
-            <article key={item.id} style={styles.itemCard}>
+            <article key={item.id} data-admin-item style={styles.itemCard}>
               <div style={styles.itemHeader}>
                 <h4 style={styles.itemTitle}>
                   {item.caption || "Новый элемент"}
                 </h4>
                 <button
                   type="button"
+                  className="admin-remove-button"
                   style={styles.removeButton}
-                  onClick={() => removeItem(itemIndex)}
+                  onClick={(event) =>
+                    animateAdminRemoval(event, () => removeItem(itemIndex))
+                  }
                 >
                   Удалить элемент
                 </button>

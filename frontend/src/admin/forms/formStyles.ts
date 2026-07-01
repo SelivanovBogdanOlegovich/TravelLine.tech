@@ -1,43 +1,56 @@
 import type { CSSProperties } from "react";
+import {
+  lightCard,
+  page,
+  primaryButton,
+  secondaryButton,
+} from "../../sections/publicStyles";
 
 export const formStyles: Record<string, CSSProperties> = {
   form: {
+    ...lightCard,
     display: "grid",
-    gap: "24px",
-    padding: "24px",
-    border: "1px solid #333",
-    borderRadius: "8px",
-    background: "#0b0d12",
+    gap: "26px",
+    padding: "32px",
   },
 
   heading: {
     margin: 0,
-    fontSize: "26px",
+    color: page.lightText,
+    fontSize: "28px",
+    lineHeight: 1.18,
+    fontWeight: 800,
   },
 
   subheading: {
     margin: 0,
-    fontSize: "20px",
+    color: page.lightText,
+    fontSize: "21px",
+    lineHeight: 1.25,
+    fontWeight: 800,
   },
 
   field: {
     display: "grid",
-    gap: "8px",
+    gap: "9px",
   },
 
   label: {
-    color: "#c9cdd6",
+    color: page.lightSoftText,
     fontSize: "14px",
+    fontWeight: 700,
   },
 
   input: {
     width: "100%",
     boxSizing: "border-box",
-    padding: "12px",
-    border: "1px solid #333",
-    borderRadius: "6px",
-    background: "#11141b",
-    color: "white",
+    minHeight: "48px",
+    padding: "13px 16px",
+    border: `1px solid ${page.lightBorder}`,
+    borderRadius: "16px",
+    outlineColor: page.accent,
+    background: page.light,
+    color: page.lightText,
     font: "inherit",
   },
 
@@ -66,10 +79,10 @@ export const formStyles: Record<string, CSSProperties> = {
   itemCard: {
     display: "grid",
     gap: "18px",
-    padding: "18px",
-    border: "1px solid #2a2a2a",
-    borderRadius: "8px",
-    background: "#0f1118",
+    padding: "22px",
+    border: `1px solid ${page.lightBorder}`,
+    borderRadius: "24px",
+    background: page.softBlue,
   },
 
   itemHeader: {
@@ -81,18 +94,20 @@ export const formStyles: Record<string, CSSProperties> = {
 
   itemTitle: {
     margin: 0,
+    color: page.lightText,
     fontSize: "18px",
+    fontWeight: 800,
   },
 
   twoColumnGrid: {
     display: "grid",
-    gridTemplateColumns: "1fr 1fr",
+    gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 260px), 1fr))",
     gap: "16px",
   },
 
   threeColumnGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+    gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 220px), 1fr))",
     gap: "16px",
   },
 
@@ -100,7 +115,7 @@ export const formStyles: Record<string, CSSProperties> = {
     display: "grid",
     gap: "12px",
     paddingTop: "16px",
-    borderTop: "1px solid #2a2a2a",
+    borderTop: `1px solid ${page.lightBorder}`,
   },
 
   nestedList: {
@@ -117,35 +132,27 @@ export const formStyles: Record<string, CSSProperties> = {
 
   emptyText: {
     margin: 0,
-    color: "#c9cdd6",
+    color: page.lightMutedText,
   },
 
   secondaryButton: {
-    padding: "10px 14px",
-    border: "1px solid #555",
-    borderRadius: "6px",
-    background: "transparent",
-    color: "white",
-    cursor: "pointer",
+    ...secondaryButton,
+    minHeight: "40px",
+    padding: "9px 14px",
+    fontSize: "14px",
   },
 
   removeButton: {
-    padding: "12px",
-    border: "1px solid #555",
-    borderRadius: "6px",
-    background: "transparent",
-    color: "white",
+    ...secondaryButton,
+    minHeight: "40px",
+    padding: "9px 14px",
+    color: page.lightSoftText,
     cursor: "pointer",
+    boxShadow: "none",
   },
 
   submitButton: {
+    ...primaryButton,
     justifySelf: "start",
-    padding: "12px 22px",
-    border: "1px solid white",
-    borderRadius: "6px",
-    background: "white",
-    color: "#0b0d12",
-    cursor: "pointer",
-    fontWeight: 700,
   },
 };

@@ -3,6 +3,7 @@ import type { FormEvent } from "react";
 import type { OfficeItem } from "../../api/contentApi";
 import type { OfficesFormData } from "../types/officesForm";
 import { formStyles as styles } from "./formStyles";
+import { animateAdminRemoval, scrollToFormSubmit } from "./scrollHelpers";
 
 type OfficesFormProps = {
   offices: OfficesFormData;
@@ -54,6 +55,7 @@ export default function OfficesForm({
       ...current,
       items: [...current.items, createOffice(current.items)],
     }));
+    scrollToFormSubmit();
   };
 
   const removeOffice = (officeIndex: number) => {
@@ -103,13 +105,16 @@ export default function OfficesForm({
 
         <div style={styles.itemsList}>
           {formData.items.map((office, officeIndex) => (
-            <article key={office.id} style={styles.itemCard}>
+            <article key={office.id} data-admin-item style={styles.itemCard}>
               <div style={styles.itemHeader}>
                 <h4 style={styles.itemTitle}>{office.city || "Новый офис"}</h4>
                 <button
                   type="button"
+                  className="admin-remove-button"
                   style={styles.removeButton}
-                  onClick={() => removeOffice(officeIndex)}
+                  onClick={(event) =>
+                    animateAdminRemoval(event, () => removeOffice(officeIndex))
+                  }
                 >
                   Удалить офис
                 </button>
