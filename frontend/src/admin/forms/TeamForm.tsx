@@ -25,6 +25,31 @@ const createSocial = (): TeamSocial => ({
   url: "",
 });
 
+const scrollToSocialRow = (memberIndex: number, socialIndex: number) => {
+  window.setTimeout(() => {
+    const row = document.querySelector<HTMLElement>(
+      `[data-admin-social="${memberIndex}-${socialIndex}"]`,
+    );
+
+    if (!row) {
+      return;
+    }
+
+    row.classList.remove("admin-added-item-flash");
+    row.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+
+    window.requestAnimationFrame(() => {
+      row.classList.add("admin-added-item-flash");
+      row.querySelector<HTMLInputElement>("[data-admin-social-url]")?.focus({
+        preventScroll: true,
+      });
+    });
+  }, 0);
+};
+
 export default function TeamForm({
   team,
   isSaving,
@@ -107,15 +132,20 @@ export default function TeamForm({
   };
 
   const addSocial = (memberIndex: number) => {
+    const newSocialIndex = formData.members[memberIndex]?.socials.length ?? 0;
+
     setFormData((current) => ({
       ...current,
       members: current.members.map((member, index) =>
         index === memberIndex
-          ? { ...member, socials: [...member.socials, createSocial()] }
+          ? {
+              ...member,
+              socials: [...member.socials, createSocial()],
+            }
           : member,
       ),
     }));
-    scrollToFormSubmit("[data-admin-nested-item]");
+    scrollToSocialRow(memberIndex, newSocialIndex);
   };
 
   const updateSocial = (
@@ -324,6 +354,7 @@ export default function TeamForm({
                         <div
                           key={socialIndex}
                           data-admin-nested-item
+                          data-admin-social={`${memberIndex}-${socialIndex}`}
                           style={styles.socialRow}
                         >
                           <label style={styles.field}>
@@ -347,6 +378,7 @@ export default function TeamForm({
                       <label style={styles.field}>
                         <span style={styles.label}>URL</span>
                         <input
+                          data-admin-social-url
                           style={styles.input}
                           value={social.url}
                           onChange={(event) =>

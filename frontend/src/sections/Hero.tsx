@@ -38,7 +38,6 @@ export default function Hero({ hero }: HeroProps) {
         {stats.length > 0 && (
           <div style={styles.stats}>
             {stats.map((stat, i) => {
-              const isTextStat = stat.value.length > 18;
               const hasLabel = stat.label.trim().length > 0;
 
               return (
@@ -49,17 +48,8 @@ export default function Hero({ hero }: HeroProps) {
                     ...(!hasLabel ? styles.statItemCentered : {}),
                   }}
                 >
-                  {isTextStat ? (
-                    <>
-                      {hasLabel && <div style={styles.statBadge}>{stat.label}</div>}
-                      <div style={styles.statTextValue}>{stat.value}</div>
-                    </>
-                  ) : (
-                    <>
-                      <div style={styles.statNumberValue}>{stat.value}</div>
-                      {hasLabel && <div style={styles.statLabel}>{stat.label}</div>}
-                    </>
-                  )}
+                  {hasLabel && <div style={styles.statBadge}>{stat.label}</div>}
+                  <div style={styles.statTextValue}>{stat.value}</div>
                 </div>
               );
             })}
@@ -177,13 +167,6 @@ const styles: Record<string, CSSProperties> = {
     justifyContent: "center",
   },
 
-  statNumberValue: {
-    color: page.lightText,
-    fontSize: "clamp(28px, 3vw, 38px)",
-    lineHeight: 1,
-    fontWeight: 900,
-  },
-
   statTextValue: {
     color: page.lightText,
     fontSize: "clamp(18px, 1.6vw, 22px)",
@@ -208,11 +191,4 @@ const styles: Record<string, CSSProperties> = {
     overflowWrap: "anywhere",
   },
 
-  statLabel: {
-    marginTop: "5px",
-    color: page.lightSoftText,
-    fontSize: "14px",
-    lineHeight: 1.4,
-    overflowWrap: "anywhere",
-  },
 };

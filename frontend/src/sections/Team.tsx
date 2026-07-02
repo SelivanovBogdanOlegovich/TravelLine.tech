@@ -29,7 +29,7 @@ export default function Team({ team }: TeamProps) {
   const isDraggingRef = useRef(false);
   const dragStartXRef = useRef(0);
   const dragStartScrollRef = useRef(0);
-  const resumeAutoScrollAtRef = useRef(0);
+  const dragDistanceRef = useRef(0);
   const [isDragging, setIsDragging] = useState(false);
   const carouselMembers = members.length > 1 ? [...members, ...members] : members;
 
@@ -46,7 +46,7 @@ export default function Team({ team }: TeamProps) {
     const tick = () => {
       const loopWidth = scroller.scrollWidth / 2;
 
-      if (!isDraggingRef.current && Date.now() >= resumeAutoScrollAtRef.current) {
+      if (!isDraggingRef.current) {
         scroller.scrollLeft += speed;
 
         if (scroller.scrollLeft >= loopWidth) {
@@ -88,8 +88,12 @@ export default function Team({ team }: TeamProps) {
           event.preventDefault();
         }}
         onPointerDown={(event) => {
-          event.preventDefault();
+          if ((event.target as HTMLElement).closest("a")) {
+            return;
+          }
+
           isDraggingRef.current = true;
+          dragDistanceRef.current = 0;
           setIsDragging(true);
           dragStartXRef.current = event.clientX;
           dragStartScrollRef.current = event.currentTarget.scrollLeft;
@@ -104,6 +108,10 @@ export default function Team({ team }: TeamProps) {
           const loopWidth = event.currentTarget.scrollWidth / 2;
           const nextScrollLeft = dragStartScrollRef.current - deltaX;
 
+          dragDistanceRef.current = Math.max(
+            dragDistanceRef.current,
+            Math.abs(deltaX),
+          );
           event.preventDefault();
           event.currentTarget.scrollLeft = nextScrollLeft;
 
@@ -119,13 +127,14 @@ export default function Team({ team }: TeamProps) {
         }}
         onPointerUp={(event) => {
           isDraggingRef.current = false;
-          resumeAutoScrollAtRef.current = Date.now() + 900;
           setIsDragging(false);
-          event.currentTarget.releasePointerCapture(event.pointerId);
+
+          if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+            event.currentTarget.releasePointerCapture(event.pointerId);
+          }
         }}
         onPointerCancel={() => {
           isDraggingRef.current = false;
-          resumeAutoScrollAtRef.current = Date.now() + 900;
           setIsDragging(false);
         }}
       >

@@ -119,18 +119,28 @@
     "subtitle": "В TravelLine мы ценим людей, их рост и вклад в общее дело",
     "members": [
       {
-        "id": 2,
-        "name": "Алексей Герасимов",
-        "position": "CTO",
-        "photo": "/team/AlekseyG.webp",
-        "socials": []
-      },
-      {
         "id": 3,
         "name": "Лена Мочалова",
         "position": "Руководитель HR-отдела",
         "photo": "/team/ElenaM.webp",
-        "socials": []
+        "socials": [
+          {
+            "label": "ВКонтаке",
+            "url": "https://id.vk.com/about/id"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "name": "Алексей Герасимов",
+        "position": "CTO",
+        "photo": "/team/AlekseyG.webp",
+        "socials": [
+          {
+            "label": "Телеграмм",
+            "url": "https://web.telegram.org/"
+          }
+        ]
       },
       {
         "id": 4,
@@ -186,7 +196,16 @@
         "name": "Настя Ягодарова",
         "position": "Руководитель проекта",
         "photo": "/team/NastyaY.webp",
-        "socials": []
+        "socials": [
+          {
+            "label": "Телеграмм",
+            "url": "https://web.telegram.org/"
+          },
+          {
+            "label": "Вконтаке",
+            "url": "https://id.vk.com/about/id"
+          }
+        ]
       },
       {
         "id": 12,
@@ -200,7 +219,12 @@
         "name": "Ваня Потехин",
         "position": "Старший руководитель проектов",
         "photo": "/team/VanyaP.webp",
-        "socials": []
+        "socials": [
+          {
+            "label": "Телеграмм",
+            "url": "https://web.telegram.org/"
+          }
+        ]
       },
       {
         "id": 14,
@@ -488,8 +512,8 @@
       "id": 3,
       "title": "Python Developer AI team ",
       "location": "в офисе, г. Йошкар-Ола",
-      "stack": [],
-      "url": "https://kazan.hh.ru/vacancy/134599368?hhtmFrom=vacancy_restore"
+      "url": "https://kazan.hh.ru/vacancy/134599368?hhtmFrom=vacancy_restore",
+      "stack": []
     }
   ],
   "footer": {

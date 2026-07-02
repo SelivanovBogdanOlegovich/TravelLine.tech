@@ -13,6 +13,7 @@ type PlatformTimelineFormProps = {
 };
 
 type TimelineYearGroup = {
+  key: string;
   year: string;
   items: PlatformTimelineItem[];
 };
@@ -91,6 +92,10 @@ const groupTimelineItems = (
   });
 
   return Array.from(groups, ([year, groupedItems]) => ({
+    key: groupedItems
+      .map((item) => item.id)
+      .sort((firstId, secondId) => firstId - secondId)
+      .join("-"),
     year,
     items: groupedItems,
   }));
@@ -229,7 +234,7 @@ export default function PlatformTimelineForm({
   const yearGroups = groupTimelineItems(formData.items);
   const yearDrag = useDraggableList({
     items: yearGroups,
-    getId: (group) => group.year,
+    getId: (group) => group.key,
     onReorder: (groups) =>
       setFormData((current) => ({
         ...current,
@@ -415,7 +420,7 @@ export default function PlatformTimelineForm({
 
             return (
             <article
-              key={group.year}
+              key={group.key}
               data-admin-year
               {...yearDrag.getItemProps(group)}
               style={{
