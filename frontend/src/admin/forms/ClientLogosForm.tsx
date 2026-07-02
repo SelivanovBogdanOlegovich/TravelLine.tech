@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { CSSProperties, FormEvent } from "react";
 import type { ClientLogo } from "../../api/contentApi";
+import { useDraggableList } from "../hooks/useDraggableList";
 import type { ClientLogosFormData } from "../types/clientLogosForm";
 import { formStyles as sharedStyles } from "./formStyles";
 import { animateAdminRemoval, scrollToFormSubmit } from "./scrollHelpers";
@@ -23,6 +24,15 @@ export default function ClientLogosForm({
   onSubmit,
 }: ClientLogosFormProps) {
   const [formData, setFormData] = useState<ClientLogosFormData>(clients);
+  const clientDrag = useDraggableList({
+    items: formData.items,
+    getId: (client) => client.id,
+    onReorder: (items) =>
+      setFormData((current) => ({
+        ...current,
+        items,
+      })),
+  });
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -114,12 +124,32 @@ export default function ClientLogosForm({
 
         <div style={styles.clientsList}>
           {formData.items.map((client, clientIndex) => (
-            <article key={client.id} data-admin-item style={styles.clientCard}>
+            <article
+              key={client.id}
+              data-admin-item
+              {...clientDrag.getItemProps(client)}
+              style={{
+                ...styles.clientCard,
+                ...(clientDrag.isDragging(client)
+                  ? styles.draggingItem
+                  : undefined),
+              }}
+            >
               <div style={styles.clientHeader}>
+                <span style={styles.itemHeaderTitle}>
+                  <button
+                    type="button"
+                    style={styles.dragHandle}
+                    aria-label="Перетащить клиента"
+                    {...clientDrag.getHandleProps(client)}
+                  >
+                    ↕
+                  </button>
                 <h4 style={styles.clientTitle}>
                   {client.name ||
                     "\u041d\u043e\u0432\u044b\u0439 \u043a\u043b\u0438\u0435\u043d\u0442"}
                 </h4>
+                </span>
                 <button
                   type="button"
                   className="admin-remove-button"

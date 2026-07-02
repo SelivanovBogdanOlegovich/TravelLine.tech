@@ -175,8 +175,8 @@ const styles: Record<string, CSSProperties> = {
   section: {
     width: "100%",
     padding: "92px 0",
-    background: page.lightSoft,
-    color: page.lightText,
+    background: page.lightText,
+    color: "#ffffff",
     overflow: "hidden",
   },
 
@@ -193,15 +193,21 @@ const styles: Record<string, CSSProperties> = {
     letterSpacing: 0,
   },
 
-  title: lightTitle,
+  title: {
+    ...lightTitle,
+    color: "#ffffff",
+  },
 
-  subtitle: lightSubtitle,
+  subtitle: {
+    ...lightSubtitle,
+    color: "rgba(255, 255, 255, 0.88)",
+  },
 
   scroller: {
     width: "100vw",
     marginTop: "52px",
     marginLeft: "calc(50% - 50vw)",
-    background: page.lightSoft,
+    background: page.lightText,
     overflowX: "auto",
     overflowY: "hidden",
     cursor: "grab",
@@ -218,7 +224,7 @@ const styles: Record<string, CSSProperties> = {
     display: "flex",
     gap: "24px",
     width: "max-content",
-    background: page.lightSoft,
+    background: page.lightText,
     padding: "2px max(24px, calc((100vw - 1180px) / 2)) 8px",
   },
 

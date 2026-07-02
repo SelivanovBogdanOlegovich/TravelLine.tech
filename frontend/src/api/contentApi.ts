@@ -19,7 +19,7 @@ export type Vacancy = {
   id: number;
   title: string;
   location: string;
-  type: string;
+  url: string;
   stack?: string[];
 };
 

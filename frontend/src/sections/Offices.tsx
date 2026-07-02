@@ -63,19 +63,27 @@ const styles: Record<string, CSSProperties> = {
     letterSpacing: 0,
   },
 
-  title: lightTitle,
+  title: {
+    ...lightTitle,
+    fontSize: "clamp(62px, 7vw, 104px)",
+    lineHeight: 0.94,
+  },
 
   subtitle: lightSubtitle,
 
   grid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 300px), 1fr))",
+    display: "flex",
+    flexWrap: "wrap",
+    justifyContent: "center",
     gap: "24px",
     marginTop: "52px",
   },
 
   card: {
     ...lightCard,
+    flex: "1 1 300px",
+    maxWidth: "min(100%, 578px)",
+    borderRadius: "0 0 28px 28px",
     overflow: "hidden",
   },
 

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import type { OfficeItem } from "../../api/contentApi";
+import { useDraggableList } from "../hooks/useDraggableList";
 import type { OfficesFormData } from "../types/officesForm";
 import { formStyles as styles } from "./formStyles";
 import { animateAdminRemoval, scrollToFormSubmit } from "./scrollHelpers";
@@ -24,6 +25,15 @@ export default function OfficesForm({
   onSubmit,
 }: OfficesFormProps) {
   const [formData, setFormData] = useState<OfficesFormData>(offices);
+  const officeDrag = useDraggableList({
+    items: formData.items,
+    getId: (office) => office.id,
+    onReorder: (items) =>
+      setFormData((current) => ({
+        ...current,
+        items,
+      })),
+  });
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -105,8 +115,26 @@ export default function OfficesForm({
 
         <div style={styles.itemsList}>
           {formData.items.map((office, officeIndex) => (
-            <article key={office.id} data-admin-item style={styles.itemCard}>
+            <article
+              key={office.id}
+              data-admin-item
+              {...officeDrag.getItemProps(office)}
+              style={{
+                ...styles.itemCard,
+                ...(officeDrag.isDragging(office)
+                  ? styles.draggingItem
+                  : undefined),
+              }}
+            >
               <div style={styles.itemHeader}>
+                <button
+                  type="button"
+                  style={styles.dragHandle}
+                  aria-label="Перетащить офис"
+                  {...officeDrag.getHandleProps(office)}
+                >
+                  {"\u2195"}
+                </button>
                 <h4 style={styles.itemTitle}>{office.city || "Новый офис"}</h4>
                 <button
                   type="button"

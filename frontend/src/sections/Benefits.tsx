@@ -6,6 +6,23 @@ type BenefitsProps = {
   benefits: ContentData["benefits"];
 };
 
+const cardVariants = [
+  { basis: "31%", color: "#22c55e" },
+  { basis: "42%", color: "#6366f1" },
+  { basis: "31%", color: "#0ea5e9" },
+  { basis: "42%", color: "#06b6d4" },
+  { basis: "31%", color: "#22c55e" },
+  { basis: "42%", color: "#6366f1" },
+  { basis: "58%", color: "#0ea5e9" },
+  { basis: "31%", color: "#06b6d4" },
+] as const;
+
+const getCardVariant = (item: Benefit, index: number) => {
+  const variant = cardVariants[Math.abs(item.id + index) % cardVariants.length];
+
+  return variant;
+};
+
 export default function Benefits({ benefits }: BenefitsProps) {
   const items: Benefit[] = benefits?.items ?? [];
 
@@ -15,6 +32,16 @@ export default function Benefits({ benefits }: BenefitsProps) {
 
   return (
     <section id="benefits" style={styles.section}>
+      <style>
+        {`
+          @media (max-width: 900px) {
+            .benefit-card {
+              flex-basis: 100% !important;
+            }
+          }
+        `}
+      </style>
+
       <div style={styles.container}>
         <div style={styles.header}>
           <h2 style={styles.title}>{benefits.title}</h2>
@@ -22,13 +49,27 @@ export default function Benefits({ benefits }: BenefitsProps) {
         </div>
 
         <div style={styles.grid}>
-          {items.map((item) => (
-            <article key={item.id} style={styles.card}>
-              <span style={styles.icon}>{item.id}</span>
-              <h3 style={styles.cardTitle}>{item.title}</h3>
-              <p style={styles.description}>{item.text ?? item.description}</p>
-            </article>
-          ))}
+          {items.map((item, index) => {
+            const variant = getCardVariant(item, index);
+
+            return (
+              <article
+                key={item.id}
+                className="benefit-card"
+                style={{
+                  ...styles.card,
+                  flexBasis: variant.basis,
+                }}
+              >
+                <h3 style={{ ...styles.cardTitle, color: variant.color }}>
+                  {item.title}
+                </h3>
+                <p style={styles.description}>
+                  {item.text ?? item.description}
+                </p>
+              </article>
+            );
+          })}
         </div>
       </div>
     </section>
@@ -41,6 +82,7 @@ const styles: Record<string, CSSProperties> = {
     padding: "104px 0",
     background: page.lightSoft,
     color: page.lightText,
+    overflow: "hidden",
   },
 
   container: container,
@@ -56,46 +98,53 @@ const styles: Record<string, CSSProperties> = {
     letterSpacing: 0,
   },
 
-  title: lightTitle,
+  title: {
+    ...lightTitle,
+    color: page.lightText,
+    fontSize: "clamp(62px, 7vw, 104px)",
+    lineHeight: 0.94,
+  },
 
-  subtitle: lightSubtitle,
+  subtitle: {
+    ...lightSubtitle,
+    color: page.lightSoftText,
+  },
 
   grid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-    gap: "22px",
+    display: "flex",
+    flexWrap: "wrap",
+    alignItems: "flex-start",
+    justifyContent: "center",
+    gap: "18px",
     marginTop: "50px",
+    position: "relative",
   },
 
   card: {
     ...lightCard,
-    padding: "30px",
+    flexGrow: 1,
+    minWidth: "260px",
+    minHeight: "156px",
+    padding: "28px 30px",
+    borderRadius: "0 0 18px 18px",
+    borderColor: page.lightBorder,
+    background: "rgba(255, 255, 255, 0.9)",
+    boxShadow: "0 18px 46px rgba(10, 124, 255, 0.08)",
     textAlign: "left",
-  },
-
-  icon: {
-    display: "grid",
-    placeItems: "center",
-    width: "42px",
-    height: "42px",
-    borderRadius: "14px",
-    background: page.softBlue,
-    color: page.accent,
-    fontWeight: 900,
+    overflow: "hidden",
   },
 
   cardTitle: {
-    marginTop: "22px",
     color: page.lightText,
-    fontSize: "22px",
-    lineHeight: 1.25,
-    fontWeight: 800,
+    fontSize: "clamp(20px, 2vw, 26px)",
+    lineHeight: 1.16,
+    fontWeight: 700,
   },
 
   description: {
     marginTop: "12px",
-    color: page.lightSoftText,
-    fontSize: "16px",
-    lineHeight: 1.65,
+    color: "#102443",
+    fontSize: "15px",
+    lineHeight: 1.5,
   },
 };

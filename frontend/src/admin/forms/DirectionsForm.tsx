@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { CSSProperties, FormEvent } from "react";
 import type { Direction } from "../../api/contentApi";
+import { useDraggableList } from "../hooks/useDraggableList";
 import type { DirectionsFormData } from "../types/directionsForm";
 import { formStyles as styles } from "./formStyles";
 import { animateAdminRemoval, scrollToFormSubmit } from "./scrollHelpers";
@@ -27,6 +28,11 @@ export default function DirectionsForm({
   const [expandedDirectionIds, setExpandedDirectionIds] = useState<
     Set<number>
   >(() => new Set());
+  const directionDrag = useDraggableList({
+    items: formData,
+    getId: (direction) => direction.id,
+    onReorder: setFormData,
+  });
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -148,11 +154,31 @@ export default function DirectionsForm({
             const isExpanded = expandedDirectionIds.has(direction.id);
 
             return (
-              <article key={direction.id} data-admin-item style={styles.itemCard}>
+              <article
+                key={direction.id}
+                data-admin-item
+                {...directionDrag.getItemProps(direction)}
+                style={{
+                  ...styles.itemCard,
+                  ...(directionDrag.isDragging(direction)
+                    ? styles.draggingItem
+                    : undefined),
+                }}
+              >
                 <div style={styles.itemHeader}>
+                  <span style={styles.itemHeaderTitle}>
+                    <button
+                      type="button"
+                      style={styles.dragHandle}
+                      aria-label="Перетащить направление"
+                      {...directionDrag.getHandleProps(direction)}
+                    >
+                      ↕
+                    </button>
                   <h4 style={styles.itemTitle}>
                     {direction.title || "\u041d\u043e\u0432\u043e\u0435 \u043d\u0430\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u0435"}
                   </h4>
+                  </span>
                   <span style={actionStyles}>
                     <button
                       type="button"

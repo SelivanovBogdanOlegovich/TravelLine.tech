@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import type { CSSProperties, FormEvent } from "react";
 import type { PlatformTimelineItem } from "../../api/contentApi";
+import { useDraggableList } from "../hooks/useDraggableList";
 import type { PlatformTimelineFormData } from "../types/platformTimelineForm";
 import { formStyles as sharedStyles } from "./formStyles";
 import { animateAdminRemoval, scrollToFormSubmit } from "./scrollHelpers";
@@ -95,6 +96,122 @@ const groupTimelineItems = (
   }));
 };
 
+type TimelineEventsListProps = {
+  items: PlatformTimelineItem[];
+  markerTypes: string[];
+  onReorder: (items: PlatformTimelineItem[]) => void;
+  onUpdate: (
+    itemId: number,
+    field: "title" | "description" | "markerType",
+    value: string,
+  ) => void;
+  onRemove: (itemId: number) => void;
+};
+
+function TimelineEventsList({
+  items,
+  markerTypes,
+  onReorder,
+  onUpdate,
+  onRemove,
+}: TimelineEventsListProps) {
+  const eventDrag = useDraggableList({
+    items,
+    getId: (item) => item.id,
+    onReorder,
+  });
+
+  return (
+    <div style={styles.eventsList}>
+      {items.map((item) => (
+        <article
+          key={item.id}
+          data-admin-event
+          {...eventDrag.getItemProps(item)}
+          style={{
+            ...styles.eventCard,
+            ...(eventDrag.isDragging(item) ? styles.draggingItem : undefined),
+          }}
+        >
+          <div style={styles.itemHeader}>
+            <span style={styles.itemHeaderTitle}>
+              <button
+                type="button"
+                style={styles.dragHandle}
+                aria-label="Перетащить событие"
+                {...eventDrag.getHandleProps(item)}
+              >
+                {"\u2195"}
+              </button>
+              <h4 style={styles.itemTitle}>
+                {item.title ||
+                  "\u041d\u043e\u0432\u043e\u0435 \u0441\u043e\u0431\u044b\u0442\u0438\u0435"}
+              </h4>
+            </span>
+            <button
+              type="button"
+              className="admin-remove-button"
+              style={styles.removeButton}
+              onClick={(event) =>
+                animateAdminRemoval(event, () => onRemove(item.id))
+              }
+            >
+              {"\u0423\u0434\u0430\u043b\u0438\u0442\u044c \u0441\u043e\u0431\u044b\u0442\u0438\u0435"}
+            </button>
+          </div>
+
+          <div style={styles.itemGrid}>
+            <label style={styles.field}>
+              <span style={styles.label}>
+                {"\u041d\u0430\u0437\u0432\u0430\u043d\u0438\u0435 \u043f\u0440\u043e\u0434\u0443\u043a\u0442\u0430"}
+              </span>
+              <input
+                style={styles.input}
+                value={item.title}
+                onChange={(event) =>
+                  onUpdate(item.id, "title", event.target.value)
+                }
+              />
+            </label>
+
+            <label style={styles.field}>
+              <span style={styles.label}>
+                {"\u0422\u0438\u043f \u043c\u0435\u0442\u043a\u0438"}
+              </span>
+              <select
+                style={styles.input}
+                value={item.markerType}
+                onChange={(event) =>
+                  onUpdate(item.id, "markerType", event.target.value)
+                }
+              >
+                {markerTypes.map((markerType) => (
+                  <option key={markerType} value={markerType}>
+                    {markerType}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+
+          <label style={styles.field}>
+            <span style={styles.label}>
+              {"\u041e\u043f\u0438\u0441\u0430\u043d\u0438\u0435"}
+            </span>
+            <textarea
+              style={{ ...styles.input, ...styles.textarea }}
+              value={item.description}
+              onChange={(event) =>
+                onUpdate(item.id, "description", event.target.value)
+              }
+            />
+          </label>
+        </article>
+      ))}
+    </div>
+  );
+}
+
 export default function PlatformTimelineForm({
   platformTimeline,
   isSaving,
@@ -110,6 +227,15 @@ export default function PlatformTimelineForm({
     [formData.items],
   );
   const yearGroups = groupTimelineItems(formData.items);
+  const yearDrag = useDraggableList({
+    items: yearGroups,
+    getId: (group) => group.year,
+    onReorder: (groups) =>
+      setFormData((current) => ({
+        ...current,
+        items: groups.flatMap((group) => group.items),
+      })),
+  });
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -201,6 +327,30 @@ export default function PlatformTimelineForm({
     }));
   };
 
+  const reorderItemsInYear = (
+    year: string,
+    reorderedItems: PlatformTimelineItem[],
+  ) => {
+    setFormData((current) => {
+      const reorderedIds = new Set(reorderedItems.map((item) => item.id));
+      let nextIndex = 0;
+
+      return {
+        ...current,
+        items: current.items.map((item) => {
+          if (item.year !== year || !reorderedIds.has(item.id)) {
+            return item;
+          }
+
+          const nextItem = reorderedItems[nextIndex];
+          nextIndex += 1;
+          return nextItem;
+        }),
+      };
+    });
+  };
+
+
   const toggleYear = (year: string) => {
     setExpandedYears((current) => {
       const next = new Set(current);
@@ -264,14 +414,32 @@ export default function PlatformTimelineForm({
             const isExpanded = expandedYears.has(group.year);
 
             return (
-            <article key={group.year} data-admin-year style={styles.yearCard}>
+            <article
+              key={group.year}
+              data-admin-year
+              {...yearDrag.getItemProps(group)}
+              style={{
+                ...styles.yearCard,
+                ...(yearDrag.isDragging(group) ? styles.draggingItem : undefined),
+              }}
+            >
               <div style={styles.itemHeader}>
-                <div style={styles.yearSummary}>
+                <div style={{ ...styles.yearSummary, ...styles.itemHeaderTitle }}>
+                  <button
+                    type="button"
+                    style={styles.dragHandle}
+                    aria-label="Перетащить год"
+                    {...yearDrag.getHandleProps(group)}
+                  >
+                    {"\u2195"}
+                  </button>
+                  <span style={styles.yearText}>
                   <strong style={styles.yearTitle}>
                     {group.year || "\u041d\u043e\u0432\u044b\u0439 \u0433\u043e\u0434"}
                   </strong>
                   <span style={styles.yearMeta}>
                     {group.items.length} {getEventWord(group.items.length)}
+                  </span>
                   </span>
                 </div>
 
@@ -319,79 +487,13 @@ export default function PlatformTimelineForm({
                     />
                   </label>
 
-              <div style={styles.eventsList}>
-                {group.items.map((item) => (
-                  <article key={item.id} data-admin-event style={styles.eventCard}>
-                    <div style={styles.itemHeader}>
-                      <h4 style={styles.itemTitle}>
-                        {item.title ||
-                          "\u041d\u043e\u0432\u043e\u0435 \u0441\u043e\u0431\u044b\u0442\u0438\u0435"}
-                      </h4>
-                      <button
-                        type="button"
-                        className="admin-remove-button"
-                        style={styles.removeButton}
-                        onClick={(event) =>
-                          animateAdminRemoval(event, () => removeItem(item.id))
-                        }
-                      >
-                        {"\u0423\u0434\u0430\u043b\u0438\u0442\u044c \u0441\u043e\u0431\u044b\u0442\u0438\u0435"}
-                      </button>
-                    </div>
-
-                    <div style={styles.itemGrid}>
-                      <label style={styles.field}>
-                        <span style={styles.label}>
-                          {"\u041d\u0430\u0437\u0432\u0430\u043d\u0438\u0435 \u043f\u0440\u043e\u0434\u0443\u043a\u0442\u0430"}
-                        </span>
-                        <input
-                          style={styles.input}
-                          value={item.title}
-                          onChange={(event) =>
-                            updateItem(item.id, "title", event.target.value)
-                          }
-                        />
-                      </label>
-
-                      <label style={styles.field}>
-                        <span style={styles.label}>
-                          {"\u0422\u0438\u043f \u043c\u0435\u0442\u043a\u0438"}
-                        </span>
-                        <select
-                          style={styles.input}
-                          value={item.markerType}
-                          onChange={(event) =>
-                            updateItem(
-                              item.id,
-                              "markerType",
-                              event.target.value,
-                            )
-                          }
-                        >
-                          {markerTypes.map((markerType) => (
-                            <option key={markerType} value={markerType}>
-                              {markerType}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-                    </div>
-
-                    <label style={styles.field}>
-                      <span style={styles.label}>
-                        {"\u041e\u043f\u0438\u0441\u0430\u043d\u0438\u0435"}
-                      </span>
-                      <textarea
-                        style={{ ...styles.input, ...styles.textarea }}
-                        value={item.description}
-                        onChange={(event) =>
-                          updateItem(item.id, "description", event.target.value)
-                        }
-                      />
-                    </label>
-                  </article>
-                ))}
-              </div>
+                  <TimelineEventsList
+                    items={group.items}
+                    markerTypes={markerTypes}
+                    onReorder={(items) => reorderItemsInYear(group.year, items)}
+                    onUpdate={updateItem}
+                    onRemove={removeItem}
+                  />
                 </>
               )}
             </article>
@@ -430,6 +532,13 @@ const styles: Record<string, CSSProperties> = {
   yearSummary: {
     display: "grid",
     gap: "6px",
+  },
+
+  yearText: {
+    display: "flex",
+    alignItems: "baseline",
+    gap: "14px",
+    flexWrap: "wrap",
   },
 
   yearTitle: {

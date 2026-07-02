@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { CSSProperties, FormEvent } from "react";
+import { useDraggableList } from "../hooks/useDraggableList";
 import type { HeroFormData } from "../types/heroForm";
 import { formStyles as sharedStyles } from "./formStyles";
 import { animateAdminRemoval, scrollToFormSubmit } from "./scrollHelpers";
@@ -16,6 +17,15 @@ export default function HeroForm({
   onSubmit,
 }: HeroFormProps) {
   const [formData, setFormData] = useState<HeroFormData>(hero);
+  const statsDrag = useDraggableList({
+    items: formData.stats,
+    getId: (_, index) => index,
+    onReorder: (stats) =>
+      setFormData((current) => ({
+        ...current,
+        stats,
+      })),
+  });
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -103,7 +113,25 @@ export default function HeroForm({
 
         <div style={styles.statsList}>
           {formData.stats.map((stat, index) => (
-            <div key={index} data-admin-item style={styles.statCard}>
+            <div
+              key={index}
+              data-admin-item
+              {...statsDrag.getItemProps(stat)}
+              style={{
+                ...styles.statCard,
+                ...(statsDrag.isDragging(stat)
+                  ? styles.draggingItem
+                  : undefined),
+              }}
+            >
+              <button
+                type="button"
+                style={styles.dragHandle}
+                aria-label="Перетащить статистику"
+                {...statsDrag.getHandleProps(stat)}
+              >
+                ↕
+              </button>
               <label style={styles.field}>
                 <span style={styles.label}>
                   {"\u0422\u0435\u043a\u0441\u0442"}

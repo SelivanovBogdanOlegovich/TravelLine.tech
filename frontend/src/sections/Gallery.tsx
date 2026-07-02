@@ -3,8 +3,6 @@ import type { ContentData, GalleryItem } from "../api/contentApi";
 import {
   container,
   lightCard,
-  lightSubtitle,
-  lightTitle,
   page,
   sectionHeader,
 } from "./publicStyles";
@@ -21,7 +19,7 @@ export default function Gallery({ gallery }: GalleryProps) {
   }
 
   return (
-    <section style={styles.section}>
+    <section id="gallery" style={styles.section}>
       <div style={styles.container}>
         <div style={styles.header}>
           <h2 style={styles.title}>{gallery.title}</h2>
@@ -35,9 +33,11 @@ export default function Gallery({ gallery }: GalleryProps) {
                 <video
                   src={item.media}
                   style={styles.media}
+                  autoPlay
+                  loop
                   muted
                   playsInline
-                  controls
+                  preload="metadata"
                 />
               ) : (
                 <img
@@ -60,38 +60,47 @@ const styles: Record<string, CSSProperties> = {
   section: {
     width: "100%",
     padding: "104px 0",
-    background: page.light,
-    color: page.lightText,
+    background: "#12203b",
+    color: "#f7fbff",
   },
 
   container: container,
 
   header: sectionHeader,
 
-  eyebrow: {
-    marginBottom: "14px",
-    color: page.lightSoftText,
-    fontSize: "12px",
-    fontWeight: 800,
-    textTransform: "uppercase",
-    letterSpacing: 0,
+  title: {
+    color: "#f7fbff",
+    fontSize: "clamp(62px, 7vw, 104px)",
+    lineHeight: 0.94,
+    fontWeight: 900,
   },
 
-  title: lightTitle,
-
-  subtitle: lightSubtitle,
+  subtitle: {
+    margin: "18px auto 0",
+    maxWidth: "720px",
+    color: "#c9dcff",
+    fontSize: "17px",
+    lineHeight: 1.7,
+  },
 
   grid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+    display: "flex",
+    flexWrap: "wrap",
+    justifyContent: "center",
     gap: "24px",
     marginTop: "52px",
   },
 
   card: {
     ...lightCard,
+    flex: "1 1 300px",
+    maxWidth: "min(100%, 377px)",
+    borderRadius: "0 0 28px 28px",
     overflow: "hidden",
     position: "relative",
+    borderColor: "rgba(255, 255, 255, 0.14)",
+    background: "rgba(255, 255, 255, 0.96)",
+    boxShadow: "0 18px 50px rgba(0, 0, 0, 0.18)",
   },
 
   media: {

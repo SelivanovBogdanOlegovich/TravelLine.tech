@@ -19,7 +19,7 @@ export default function Hero({ hero }: HeroProps) {
 
           <div style={styles.actions}>
             <a href="#vacancies" style={styles.primaryButton}>
-              {hero?.buttonText ?? "View vacancies"}
+              Вакансии
             </a>
             <a href="#team" style={styles.secondaryButton}>
               Узнать о команде
@@ -106,8 +106,8 @@ const styles: Record<string, CSSProperties> = {
 
   title: {
     color: page.lightText,
-    fontSize: "clamp(44px, 7vw, 78px)",
-    lineHeight: 1.02,
+    fontSize: "clamp(72px, 9vw, 132px)",
+    lineHeight: 0.92,
     fontWeight: 900,
   },
 
@@ -167,7 +167,7 @@ const styles: Record<string, CSSProperties> = {
     gap: "14px",
     padding: "22px",
     border: `1px solid ${page.lightBorder}`,
-    borderRadius: "24px",
+    borderRadius: "0 0 28px 28px",
     background: "rgba(255, 255, 255, 0.86)",
     textAlign: "left",
     boxShadow: "0 16px 42px rgba(10, 124, 255, 0.08)",

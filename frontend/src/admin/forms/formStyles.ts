@@ -92,6 +92,13 @@ export const formStyles: Record<string, CSSProperties> = {
     alignItems: "center",
   },
 
+  itemHeaderTitle: {
+    display: "flex",
+    gap: "12px",
+    alignItems: "center",
+    minWidth: 0,
+  },
+
   itemTitle: {
     margin: 0,
     color: page.lightText,
@@ -149,6 +156,25 @@ export const formStyles: Record<string, CSSProperties> = {
     color: page.lightSoftText,
     cursor: "pointer",
     boxShadow: "none",
+  },
+
+  dragHandle: {
+    ...secondaryButton,
+    minHeight: "34px",
+    padding: "7px 11px",
+    fontSize: "13px",
+    lineHeight: 1,
+    color: page.lightSoftText,
+    cursor: "grab",
+    boxShadow: "none",
+    whiteSpace: "nowrap",
+  },
+
+  draggingItem: {
+    opacity: 0.62,
+    transform: "scale(0.995)",
+    borderColor: "rgba(10, 124, 255, 0.55)",
+    boxShadow: "0 18px 44px rgba(10, 124, 255, 0.16)",
   },
 
   submitButton: {

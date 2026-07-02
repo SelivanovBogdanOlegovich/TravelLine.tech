@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import type { GalleryItem } from "../../api/contentApi";
+import { useDraggableList } from "../hooks/useDraggableList";
 import type { GalleryFormData } from "../types/galleryForm";
 import { formStyles as styles } from "./formStyles";
 import { animateAdminRemoval, scrollToFormSubmit } from "./scrollHelpers";
@@ -24,6 +25,15 @@ export default function GalleryForm({
   onSubmit,
 }: GalleryFormProps) {
   const [formData, setFormData] = useState<GalleryFormData>(gallery);
+  const galleryDrag = useDraggableList({
+    items: formData.items,
+    getId: (item) => item.id,
+    onReorder: (items) =>
+      setFormData((current) => ({
+        ...current,
+        items,
+      })),
+  });
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -106,11 +116,31 @@ export default function GalleryForm({
 
         <div style={styles.itemsList}>
           {formData.items.map((item, itemIndex) => (
-            <article key={item.id} data-admin-item style={styles.itemCard}>
+            <article
+              key={item.id}
+              data-admin-item
+              {...galleryDrag.getItemProps(item)}
+              style={{
+                ...styles.itemCard,
+                ...(galleryDrag.isDragging(item)
+                  ? styles.draggingItem
+                  : undefined),
+              }}
+            >
               <div style={styles.itemHeader}>
+                <span style={styles.itemHeaderTitle}>
+                  <button
+                    type="button"
+                    style={styles.dragHandle}
+                    aria-label="Перетащить элемент"
+                    {...galleryDrag.getHandleProps(item)}
+                  >
+                    ↕
+                  </button>
                 <h4 style={styles.itemTitle}>
                   {item.caption || "Новый элемент"}
                 </h4>
+                </span>
                 <button
                   type="button"
                   className="admin-remove-button"

@@ -52,8 +52,8 @@ const styles: Record<string, CSSProperties> = {
   section: {
     width: "100%",
     padding: "108px 0",
-    background: "linear-gradient(135deg, #eaf4ff 0%, #f7faff 100%)",
-    color: page.lightText,
+    background: "#12203b",
+    color: "#f7fbff",
   },
 
   container: {
@@ -78,15 +78,15 @@ const styles: Record<string, CSSProperties> = {
   },
 
   title: {
-    color: page.lightText,
-    fontSize: "clamp(34px, 5vw, 52px)",
-    lineHeight: 1.08,
+    color: "#f7fbff",
+    fontSize: "clamp(68px, 8vw, 118px)",
+    lineHeight: 0.94,
     fontWeight: 900,
   },
 
   subtitle: {
     marginTop: "18px",
-    color: page.lightSoftText,
+    color: "#c9dcff",
     fontSize: "18px",
     lineHeight: 1.7,
   },
@@ -96,6 +96,9 @@ const styles: Record<string, CSSProperties> = {
     display: "grid",
     gap: "18px",
     padding: "32px",
+    borderRadius: "0 0 28px 28px",
+    borderColor: "rgba(255, 255, 255, 0.14)",
+    boxShadow: "0 22px 60px rgba(0, 0, 0, 0.22)",
   },
 
   field: {

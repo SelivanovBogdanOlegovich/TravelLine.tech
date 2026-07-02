@@ -6,29 +6,13 @@ type HeaderProps = {
   header: ContentData["header"];
 };
 
-const hiddenNavIds = new Set(["about"]);
-
-const linkLabels: Record<string, string> = {
-  directions: "Направления",
-  vacancies: "Вакансии",
-  benefits: "Плюшки",
-};
+const links = [
+  { id: "directions", label: "Направления" },
+  { id: "benefits", label: "Плюшки" },
+  { id: "gallery", label: "О нас" },
+];
 
 export default function Header({ header }: HeaderProps) {
-  const rawLinks = (
-    header?.links ??
-    header?.nav?.map((label) => ({
-      label,
-      id: label.toLowerCase(),
-    })) ??
-    []
-  ).filter((link) => !hiddenNavIds.has(link.id));
-
-  const links = rawLinks.map((link) => ({
-    ...link,
-    label: linkLabels[link.id] ?? link.label,
-  }));
-
   return (
     <>
       <header style={styles.header}>
@@ -38,8 +22,8 @@ export default function Header({ header }: HeaderProps) {
           </a>
 
           <nav style={styles.nav} aria-label="Основная навигация">
-            {links.map((link, i) => (
-              <a key={i} href={"#" + link.id} style={styles.link}>
+            {links.map((link) => (
+              <a key={link.id} href={"#" + link.id} style={styles.link}>
                 {link.label}
               </a>
             ))}

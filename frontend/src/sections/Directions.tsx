@@ -211,22 +211,29 @@ const styles: Record<string, CSSProperties> = {
 
   header: sectionHeader,
 
-  title: lightTitle,
+  title: {
+    ...lightTitle,
+    fontSize: "clamp(62px, 7vw, 104px)",
+    lineHeight: 0.94,
+  },
 
   grid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 430px), 1fr))",
+    display: "flex",
+    flexWrap: "wrap",
+    justifyContent: "center",
     gap: "24px",
     marginTop: "46px",
   },
 
   card: {
     position: "relative",
+    flex: "1 1 430px",
+    maxWidth: "min(100%, 578px)",
     minHeight: "230px",
     padding: "34px 36px",
     border: `1px solid ${page.lightBorder}`,
     borderRadius: "0 0 28px 28px",
-    background: "#eef5ff",
+    background: page.lightCard,
     boxShadow: "0 18px 46px rgba(10, 124, 255, 0.08)",
     overflow: "visible",
     textAlign: "left",

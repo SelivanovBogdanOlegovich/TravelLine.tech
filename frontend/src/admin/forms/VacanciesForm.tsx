@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { CSSProperties, FormEvent } from "react";
 import type { Vacancy } from "../../api/contentApi";
+import { useDraggableList } from "../hooks/useDraggableList";
 import type { VacanciesFormData } from "../types/vacanciesForm";
 import { formStyles as styles } from "./formStyles";
 import { animateAdminRemoval, scrollToFormSubmit } from "./scrollHelpers";
@@ -15,7 +16,7 @@ const createVacancy = (vacancies: Vacancy[]): Vacancy => ({
   id: Math.max(0, ...vacancies.map((vacancy) => vacancy.id)) + 1,
   title: "",
   location: "",
-  type: "",
+  url: "",
   stack: [],
 });
 
@@ -28,6 +29,11 @@ export default function VacanciesForm({
   const [expandedVacancyIds, setExpandedVacancyIds] = useState<Set<number>>(
     () => new Set(),
   );
+  const vacancyDrag = useDraggableList({
+    items: formData,
+    getId: (vacancy) => vacancy.id,
+    onReorder: setFormData,
+  });
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -36,7 +42,7 @@ export default function VacanciesForm({
 
   const updateVacancy = (
     vacancyIndex: number,
-    field: "title" | "location" | "type",
+    field: "title" | "location" | "url",
     value: string,
   ) => {
     setFormData((current) =>
@@ -149,11 +155,31 @@ export default function VacanciesForm({
             const isExpanded = expandedVacancyIds.has(vacancy.id);
 
             return (
-              <article key={vacancy.id} data-admin-item style={styles.itemCard}>
+              <article
+                key={vacancy.id}
+                data-admin-item
+                {...vacancyDrag.getItemProps(vacancy)}
+                style={{
+                  ...styles.itemCard,
+                  ...(vacancyDrag.isDragging(vacancy)
+                    ? styles.draggingItem
+                    : undefined),
+                }}
+              >
                 <div style={styles.itemHeader}>
+                  <span style={styles.itemHeaderTitle}>
+                    <button
+                      type="button"
+                      style={styles.dragHandle}
+                      aria-label="Перетащить вакансию"
+                      {...vacancyDrag.getHandleProps(vacancy)}
+                    >
+                      ↕
+                    </button>
                   <h4 style={styles.itemTitle}>
                     {vacancy.title || "\u041d\u043e\u0432\u0430\u044f \u0432\u0430\u043a\u0430\u043d\u0441\u0438\u044f"}
                   </h4>
+                  </span>
                   <span style={actionStyles}>
                     <button
                       type="button"
@@ -213,14 +239,15 @@ export default function VacanciesForm({
                       </label>
 
                       <label style={styles.field}>
-                        <span style={styles.label}>{"\u0422\u0438\u043f \u0437\u0430\u043d\u044f\u0442\u043e\u0441\u0442\u0438"}</span>
+                        <span style={styles.label}>{"\u0421\u0441\u044b\u043b\u043a\u0430 \u043d\u0430 \u0432\u0430\u043a\u0430\u043d\u0441\u0438\u044e"}</span>
                         <input
                           style={styles.input}
-                          value={vacancy.type}
+                          value={vacancy.url}
+                          placeholder="https://hh.ru/vacancy/..."
                           onChange={(event) =>
                             updateVacancy(
                               vacancyIndex,
-                              "type",
+                              "url",
                               event.target.value,
                             )
                           }

@@ -4,13 +4,13 @@
   --card-bg: #ffffff;
   --card-bg-soft: rgba(255, 255, 255, 0.72);
   --border-dark: rgba(10, 124, 255, 0.12);
-  --text-primary: #0b1f3a;
-  --text-secondary: #49627d;
-  --text-muted: #7a8ea6;
+  --text-primary: #5278d8;
+  --text-secondary: #577196;
+  --text-muted: #7b91b1;
   --light-bg: #f7faff;
   --light-card: #ffffff;
-  --light-text: #0b1f3a;
-  --light-muted: #49627d;
+  --light-text: #5278d8;
+  --light-muted: #577196;
   --light-border: rgba(10, 124, 255, 0.12);
   --accent: #0a7cff;
   --accent-hover: #006be0;

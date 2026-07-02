@@ -15,7 +15,7 @@ export const page = {
   lightCard: "#ffffff",
   lightText: "#5278d8",
   lightSoftText: "#577196",
-  lightMutedText: "#7a8ea6",
+  lightMutedText: "#7b91b1",
   lightBorder: "rgba(10, 124, 255, 0.12)",
   strongBorder: "rgba(10, 124, 255, 0.22)",
   accent: "#0a7cff",

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { CSSProperties, FormEvent } from "react";
 import type { TeamMember, TeamSocial } from "../../api/contentApi";
+import { useDraggableList } from "../hooks/useDraggableList";
 import type { TeamFormData } from "../types/teamForm";
 import { formStyles as sharedStyles } from "./formStyles";
 import { animateAdminRemoval, scrollToFormSubmit } from "./scrollHelpers";
@@ -33,6 +34,15 @@ export default function TeamForm({
   const [expandedMemberIds, setExpandedMemberIds] = useState<Set<number>>(
     () => new Set(),
   );
+  const memberDrag = useDraggableList({
+    items: formData.members,
+    getId: (member) => member.id,
+    onReorder: (members) =>
+      setFormData((current) => ({
+        ...current,
+        members,
+      })),
+  });
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -193,12 +203,32 @@ export default function TeamForm({
 
         <div style={styles.membersList}>
           {formData.members.map((member, memberIndex) => (
-            <article key={member.id} data-admin-item style={styles.memberCard}>
+            <article
+              key={member.id}
+              data-admin-item
+              {...memberDrag.getItemProps(member)}
+              style={{
+                ...styles.memberCard,
+                ...(memberDrag.isDragging(member)
+                  ? styles.draggingItem
+                  : undefined),
+              }}
+            >
               <div style={styles.memberHeader}>
+                <span style={styles.itemHeaderTitle}>
+                  <button
+                    type="button"
+                    style={styles.dragHandle}
+                    aria-label="Перетащить сотрудника"
+                    {...memberDrag.getHandleProps(member)}
+                  >
+                    ↕
+                  </button>
                 <h4 style={styles.memberTitle}>
                   {member.name ||
                     "\u041d\u043e\u0432\u044b\u0439 \u0441\u043e\u0442\u0440\u0443\u0434\u043d\u0438\u043a"}
                 </h4>
+                </span>
                 <div style={styles.memberActions}>
                   <button
                     type="button"
