@@ -43,7 +43,7 @@ TravelLine.tech/
 +-- backend/
 +-- docs/
 +-- README.md
-`-- docker-compose.yml
++-- docker-compose.yml
 ```
 
 ## Запуск через Docker
